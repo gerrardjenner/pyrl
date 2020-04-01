@@ -83,7 +83,7 @@ class GameMap:
                         # blocks true - pushable true?
                         follower = Entity(center_of_last_room_x + i, center_of_last_room_y + i, 'A', libtcod.green,
                                           'Follower', blocks=False,
-                                          render_order=RenderOrder.CORPSE, fighter=fighter_component, ai=ai_component)
+                                          render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                         entities.append(follower)
 
 

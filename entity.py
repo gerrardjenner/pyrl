@@ -134,6 +134,7 @@ def get_blocking_entities_at_location(entities, destination_x, destination_y):
 
     return None
 
+
 def get_nonblocking_entities_at_location(entities, destination_x, destination_y):
     for entity in entities:
         if (not entity.blocks) and entity.x == destination_x and entity.y == destination_y:

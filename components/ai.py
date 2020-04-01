@@ -75,6 +75,4 @@ class Follower:
                         results.extend(attack_results)
 
 
-
-
         return results
