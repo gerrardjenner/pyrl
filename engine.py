@@ -11,6 +11,8 @@ from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
 from render_functions import clear_all, render_all
 
+from random import randint
+
 
 def play_game(player, entities, game_map, message_log, game_state, con, panel, constants):
     fov_recompute = True
@@ -85,6 +87,10 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                         entities.remove(target)
 
                     fov_recompute = True
+
+                # have a percent chance to increase hunger
+                if randint(0,10) < 3:
+                    player.fighter.hunger += 1
 
                 game_state = GameStates.ENEMY_TURN
 

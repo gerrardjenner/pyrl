@@ -73,3 +73,9 @@ class Fighter:
 
     def addgold(self, amount):
         self.gold += amount
+
+    def eat(self, amount):
+        self.hunger -= amount
+
+        if self.hunger < 0:
+            self.hunger = 0

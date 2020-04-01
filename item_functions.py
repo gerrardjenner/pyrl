@@ -31,6 +31,21 @@ def heal(*args, **kwargs):
     return results
 
 
+def eat(*args, **kwargs):
+    entity = args[0]
+    amount = kwargs.get('amount')
+
+    results = []
+
+    if entity.fighter.hunger == 0:
+        results.append({'consumed': False, 'message': Message('You are already full!', libtcod.yellow)})
+    else:
+        entity.fighter.eat(amount)
+        results.append({'consumed': True, 'message': Message('You eat the apple ... mmm!', libtcod.green)})
+
+    return results
+
+
 def cast_lightning(*args, **kwargs):
     caster = args[0]
     entities = kwargs.get('entities')
