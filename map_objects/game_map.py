@@ -12,7 +12,7 @@ from entity import Entity
 
 from game_messages import Message
 
-from item_functions import cast_confuse, cast_fireball, cast_lightning, heal, acquire_gold, eat
+from item_functions import cast_confuse, cast_fireball, cast_lightning, heal, acquire_gold, eat, clean
 
 from map_objects.rectangle import Rect
 from map_objects.tile import Tile
@@ -148,6 +148,7 @@ class GameMap:
             'healing_potion': 35,
             'gold': 50,
             'apple': 15,
+            'sanitiser': 50,
             'sword': from_dungeon_level([[5, 4]], self.dungeon_level),
             'shield': from_dungeon_level([[15, 8]], self.dungeon_level),
             'lightning_scroll': from_dungeon_level([[25, 4]], self.dungeon_level),
@@ -195,6 +196,10 @@ class GameMap:
                 elif item_choice == 'apple':
                     item_component = Item(use_function=eat, amount=40)
                     item = Entity(x, y, 'a', libtcod.red, 'Apple', render_order=RenderOrder.ITEM,
+                                  item=item_component)
+                elif item_choice == 'sanitiser':
+                    item_component = Item(use_function=clean, amount=40)
+                    item = Entity(x, y, 'b', libtcod.red, 'Hand Sanitiser', render_order=RenderOrder.ITEM,
                                   item=item_component)
                 elif item_choice == 'sword':
                     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=3)

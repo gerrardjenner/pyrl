@@ -46,6 +46,21 @@ def eat(*args, **kwargs):
     return results
 
 
+def clean(*args, **kwargs):
+    entity = args[0]
+    amount = kwargs.get('amount')
+
+    results = []
+
+    if entity.fighter.contact == 0:
+        results.append({'consumed': False, 'message': Message('You are already clean', libtcod.light_blue)})
+    else:
+        entity.fighter.clean(amount)
+        results.append({'consumed': True, 'message': Message('Happy Birthday to you Happy Birthday to you ...', libtcod.light_blue)})
+
+    return results
+
+
 def cast_lightning(*args, **kwargs):
     caster = args[0]
     entities = kwargs.get('entities')

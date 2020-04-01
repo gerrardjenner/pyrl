@@ -4,7 +4,7 @@ from game_messages import Message
 
 
 class Fighter:
-    def __init__(self, hp, defense, power, xp=0, gold=0, hunger=0):
+    def __init__(self, hp, defense, power, xp=0, gold=0, hunger=0, contact=0):
         self.base_max_hp = hp
         self.hp = hp
         self.base_defense = defense
@@ -12,6 +12,7 @@ class Fighter:
         self.xp = xp
         self.gold = gold
         self.hunger = hunger
+        self.contact = contact
 
     @property
     def max_hp(self):
@@ -79,3 +80,9 @@ class Fighter:
 
         if self.hunger < 0:
             self.hunger = 0
+
+    def clean(self, amount):
+        self.contact -= amount
+
+        if self.contact < 0:
+            self.contact = 0

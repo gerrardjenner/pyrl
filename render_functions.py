@@ -85,9 +85,12 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
                libtcod.light_red, libtcod.darker_red)
     render_bar(panel, 1, 2, bar_width, 'Hunger', player.fighter.hunger, 100,
                libtcod.light_blue, libtcod.darker_blue)
-    libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT,
+    render_bar(panel, 1, 3, bar_width, 'Contact', player.fighter.contact, 100,
+               libtcod.dark_yellow, libtcod.darker_yellow)
+
+    libtcod.console_print_ex(panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT,
                              'Gold: {0}'.format(player.fighter.gold))
-    libtcod.console_print_ex(panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT,
+    libtcod.console_print_ex(panel, 1, 6, libtcod.BKGND_NONE, libtcod.LEFT,
                              'Dungeon level: {0}'.format(game_map.dungeon_level))
 
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)

@@ -10,6 +10,11 @@ class BasicMonster:
         results = []
 
         monster = self.owner
+        if monster.distance_to(target) < 4:
+            target.fighter.contact += 1
+            #attack_results = monster.fighter.attack(target)
+            #results.extend(attack_results)
+
         if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
 
             if monster.distance_to(target) >= 2:
