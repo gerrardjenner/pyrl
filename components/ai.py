@@ -11,9 +11,10 @@ class BasicMonster:
 
         monster = self.owner
         if monster.distance_to(target) < 4:
-            target.fighter.contact += 1
-            #attack_results = monster.fighter.attack(target)
-            #results.extend(attack_results)
+            if(target.fighter.contact < 100):
+                target.fighter.contact += 1
+                #attack_results = monster.fighter.attack(target)
+                #results.extend(attack_results)
 
         if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
 
@@ -57,7 +58,8 @@ class Follower:
         if libtcod.map_is_in_fov(fov_map, follower.x, follower.y):
 
             if follower.distance_to(target) >= 2:
-                follower.move_astar(target, entities, game_map)
+                if follower.distance_to(target) > 1:
+                    follower.move_astar(target, entities, game_map)
 
             #elif target.fighter.hp > 0:
             #    attack_results = follower.fighter.attack(target)

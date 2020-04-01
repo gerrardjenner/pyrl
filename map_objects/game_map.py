@@ -41,6 +41,8 @@ class GameMap:
 
         center_of_last_room_x = None
         center_of_last_room_y = None
+        #center_of_first_room_x = None
+        #center_of_first_room_y = None
 
         for r in range(max_rooms):
             # random width and height
@@ -74,14 +76,17 @@ class GameMap:
                     player.x = new_x
                     player.y = new_y
 
-                    # add Follower
-                    fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
-                    ai_component = Follower()
-                    #blocks true - pushable true?
-                    follower = Entity(center_of_last_room_x + 1, center_of_last_room_y + 1, 'A', libtcod.green,
-                                      'Follower', blocks=False,
-                                      render_order=RenderOrder.CORPSE, fighter=fighter_component, ai=ai_component)
-                    entities.append(follower)
+                    for i in range(self.dungeon_level):
+                        # add Follower
+                        fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
+                        ai_component = Follower()
+                        # blocks true - pushable true?
+                        follower = Entity(center_of_last_room_x + i, center_of_last_room_y + i, 'A', libtcod.green,
+                                          'Follower', blocks=False,
+                                          render_order=RenderOrder.CORPSE, fighter=fighter_component, ai=ai_component)
+                        entities.append(follower)
+
+
                 else:
                     # all rooms after the first:
                     # connect it to the previous room with a tunnel
@@ -110,6 +115,15 @@ class GameMap:
                              render_order=RenderOrder.STAIRS, stairs=stairs_component)
         entities.append(down_stairs)
 
+        # add Follower
+        fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
+        ai_component = Follower()
+        # blocks true - pushable true?
+        follower = Entity(center_of_last_room_x + i, center_of_last_room_y + i, 'A', libtcod.green,
+                          'Follower', blocks=False,
+                          render_order=RenderOrder.CORPSE, fighter=fighter_component, ai=ai_component)
+        entities.append(follower)
+
 
 
     def create_room(self, room):
@@ -131,7 +145,7 @@ class GameMap:
 
     def place_entities(self, room, entities):
         max_monsters_per_room = from_dungeon_level([[2, 1], [3, 4], [5, 6]], self.dungeon_level)
-        max_items_per_room = from_dungeon_level([[1, 1], [2, 4]], self.dungeon_level)
+        max_items_per_room = from_dungeon_level([[2, 1], [3, 4]], self.dungeon_level)
 
         # Get a random number of monsters
         number_of_monsters = randint(0, max_monsters_per_room)
@@ -146,8 +160,8 @@ class GameMap:
 
         item_chances = {
             'healing_potion': 35,
-            'gold': 50,
-            'apple': 15,
+            'gold': 40,
+            'apple': 40,
             'sanitiser': 50,
             'sword': from_dungeon_level([[5, 4]], self.dungeon_level),
             'shield': from_dungeon_level([[15, 8]], self.dungeon_level),
@@ -198,7 +212,7 @@ class GameMap:
                     item = Entity(x, y, 'a', libtcod.red, 'Apple', render_order=RenderOrder.ITEM,
                                   item=item_component)
                 elif item_choice == 'sanitiser':
-                    item_component = Item(use_function=clean, amount=40)
+                    item_component = Item(use_function=clean, amount=100)
                     item = Entity(x, y, 'b', libtcod.red, 'Hand Sanitiser', render_order=RenderOrder.ITEM,
                                   item=item_component)
                 elif item_choice == 'sword':

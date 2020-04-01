@@ -7,6 +7,7 @@ Make follower pushable
 keep track of follower stats
 enemies can target followers
 followers continue through stairs
+follower rendering on top of other entities
 
 x hunger bar
 x apples
