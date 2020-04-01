@@ -91,6 +91,16 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 # have a percent chance to increase hunger
                 if randint(0,10) < 3:
                     player.fighter.hunger += 1
+                if player.fighter.hunger > 99:
+                    player.fighter.hunger = 100
+                    # take damage
+                    player.fighter.take_damage(1)
+                    message_log.add_message(Message('Hunger Pain!', libtcod.lighter_red))
+                if player.fighter.contact > 99:
+                    player.fighter.contact = 100
+                    # take damage
+                    player.fighter.take_damage(10)
+                    message_log.add_message(Message('Infected!', libtcod.lighter_yellow))
 
                 game_state = GameStates.ENEMY_TURN
 

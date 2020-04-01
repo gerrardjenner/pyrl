@@ -87,6 +87,10 @@ def character_screen(player, character_screen_width, character_screen_height, sc
                                   libtcod.LEFT, 'Attack: {0}'.format(player.fighter.power))
     libtcod.console_print_rect_ex(window, 0, 8, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
                                   libtcod.LEFT, 'Defense: {0}'.format(player.fighter.defense))
+    libtcod.console_print_rect_ex(window, 0, 9, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
+                                  libtcod.LEFT, 'Hunger: {0}'.format(player.fighter.hunger))
+    libtcod.console_print_rect_ex(window, 0, 10, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
+                                  libtcod.LEFT, 'Contact: {0}'.format(player.fighter.contact))
 
     x = screen_width // 2 - character_screen_width // 2
     y = screen_height // 2 - character_screen_height // 2

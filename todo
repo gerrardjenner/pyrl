@@ -1,5 +1,5 @@
-add gold
-pick up gold
+x add gold
+x pick up gold
 add gold to player stats
 add merchant/blacksmith
 
@@ -8,8 +8,9 @@ keep track of follower stats
 enemies can target followers
 followers continue through stairs
 
-hunger bar
-apples
+x hunger bar
+x apples
+when hunger at full take damage
 
 barter with enemies instead of fighting
 
