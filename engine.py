@@ -14,7 +14,7 @@ from render_functions import clear_all, render_all
 from random import randint
 
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, constants):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, allies):
     fov_recompute = True
 
     fov_map = initialize_fov(game_map)
@@ -141,7 +141,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
                 if entity.stairs and entity.x == player.x and entity.y == player.y:
-                    entities = game_map.next_floor(player, message_log, constants)
+                    entities = game_map.next_floor(player, message_log, constants, allies)
                     fov_map = initialize_fov(game_map)
                     fov_recompute = True
                     libtcod.console_clear(con)
@@ -181,7 +181,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
             else:
-                save_game(player, entities, game_map, message_log, game_state)
+                save_game(player, entities, game_map, message_log, game_state, allies)
 
                 return True
 
@@ -339,13 +339,13 @@ def main():
             if show_load_error_message and (new_game or load_saved_game or exit_game):
                 show_load_error_message = False
             elif new_game:
-                player, entities, game_map, message_log, game_state = get_game_variables(constants)
+                player, entities, game_map, message_log, game_state, allies = get_game_variables(constants)
                 game_state = GameStates.PLAYERS_TURN
 
                 show_main_menu = False
             elif load_saved_game:
                 try:
-                    player, entities, game_map, message_log, game_state = load_game()
+                    player, entities, game_map, message_log, game_state, allies = load_game()
                     show_main_menu = False
                 except FileNotFoundError:
                     show_load_error_message = True
@@ -354,7 +354,7 @@ def main():
 
         else:
             libtcod.console_clear(con)
-            play_game(player, entities, game_map, message_log, game_state, con, panel, constants)
+            play_game(player, entities, game_map, message_log, game_state, con, panel, constants, allies)
 
             show_main_menu = True
 

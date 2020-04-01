@@ -89,6 +89,7 @@ def get_game_variables(constants):
                     fighter=fighter_component, inventory=inventory_component, level=level_component,
                     equipment=equipment_component)
     entities = [player]
+    allies = []
 
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
     dagger = Entity(0, 0, '-', libtcod.sky, 'Dagger', equippable=equippable_component)
@@ -97,10 +98,10 @@ def get_game_variables(constants):
 
     game_map = GameMap(constants['map_width'], constants['map_height'])
     game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'], player, entities)
+                      constants['map_width'], constants['map_height'], player, entities, allies)
 
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
 
     game_state = GameStates.PLAYERS_TURN
 
-    return player, entities, game_map, message_log, game_state
+    return player, entities, game_map, message_log, game_state, allies

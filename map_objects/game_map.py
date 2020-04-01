@@ -35,7 +35,7 @@ class GameMap:
 
         return tiles
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, allies):
         rooms = []
         num_rooms = 0
 
@@ -76,15 +76,20 @@ class GameMap:
                     player.x = new_x
                     player.y = new_y
 
-                    for i in range(self.dungeon_level):
-                        # add Follower
-                        fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
-                        ai_component = Follower()
-                        # blocks true - pushable true?
-                        follower = Entity(center_of_last_room_x + i, center_of_last_room_y + i, 'A', libtcod.green,
-                                          'Follower', blocks=False,
-                                          render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
-                        entities.append(follower)
+                    j = 1
+                    for i in allies:
+                        i.x = new_x + j
+                        i.y = new_y + j
+                        j += 1
+                    #for i in range(self.dungeon_level):
+                    #    # add Follower
+                    #    fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
+                    #    ai_component = Follower()
+                    #    # blocks true - pushable true?
+                    #    follower = Entity(center_of_last_room_x + i, center_of_last_room_y + i, 'A', libtcod.green,
+                    #                      'Follower', blocks=False,
+                    #                      render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+                    #    entities.append(follower)
 
 
                 else:
@@ -119,10 +124,11 @@ class GameMap:
         fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
         ai_component = Follower()
         # blocks true - pushable true?
-        follower = Entity(center_of_last_room_x + i, center_of_last_room_y + i, 'A', libtcod.green,
+        follower = Entity(center_of_last_room_x + 1, center_of_last_room_y + 1, 'A', libtcod.green,
                           'Follower', blocks=False,
                           render_order=RenderOrder.CORPSE, fighter=fighter_component, ai=ai_component)
         entities.append(follower)
+        allies.append(follower)
 
 
 
@@ -245,13 +251,13 @@ class GameMap:
 
         return False
 
-    def next_floor(self, player, message_log, constants):
+    def next_floor(self, player, message_log, constants, allies):
         self.dungeon_level += 1
         entities = [player]
 
         self.tiles = self.initialize_tiles()
         self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'], player, entities)
+                      constants['map_width'], constants['map_height'], player, entities, allies)
 
         player.fighter.heal(player.fighter.max_hp // 2)
 
