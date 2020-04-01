@@ -125,8 +125,8 @@ class GameMap:
         ai_component = Follower()
         # blocks true - pushable true?
         follower = Entity(center_of_last_room_x + 1, center_of_last_room_y + 1, 'A', libtcod.green,
-                          'Follower', blocks=False,
-                          render_order=RenderOrder.CORPSE, fighter=fighter_component, ai=ai_component)
+                          'Follower', blocks=True,
+                          render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
         entities.append(follower)
         allies.append(follower)
 
@@ -253,13 +253,18 @@ class GameMap:
 
     def next_floor(self, player, message_log, constants, allies):
         self.dungeon_level += 1
+
         entities = [player]
+        for i in allies:
+            entities.append(i)
 
         self.tiles = self.initialize_tiles()
         self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
                       constants['map_width'], constants['map_height'], player, entities, allies)
 
         player.fighter.heal(player.fighter.max_hp // 2)
+        player.fighter.eat(100)
+        player.fighter.clean(100)
 
         message_log.add_message(Message('You take a moment to rest, and recover your strength.', libtcod.light_violet))
 

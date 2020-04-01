@@ -13,6 +13,8 @@ from render_functions import clear_all, render_all
 
 from random import randint
 
+from pyrl.components.ai import Follower
+
 
 def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, allies):
     fov_recompute = True
@@ -73,8 +75,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 target = get_blocking_entities_at_location(entities, destination_x, destination_y)
 
                 if target:
-                    attack_results = player.fighter.attack(target)
-                    player_turn_results.extend(attack_results)
+                    if not target.name == 'Follower':
+                        attack_results = player.fighter.attack(target)
+                        player_turn_results.extend(attack_results)
                 else:
                     player.move(dx, dy)
                     #if entity gold then add to gold
@@ -268,7 +271,10 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         if game_state == GameStates.ENEMY_TURN:
             for entity in entities:
                 if entity.ai:
-                    enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities)
+                    if isinstance(entity.ai, Follower) and len(allies) > 1:
+                        enemy_turn_results = entity.ai.take_turn(allies[-1], fov_map, game_map, entities)# player should be previous allies
+                    else:
+                        enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities)
 
                     for enemy_turn_result in enemy_turn_results:
                         message = enemy_turn_result.get('message')
