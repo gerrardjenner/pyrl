@@ -55,6 +55,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
         show_inventory = action.get('show_inventory')
         drop_inventory = action.get('drop_inventory')
+        show_merchant = action.get('show_merchant')
         inventory_index = action.get('inventory_index')
         take_stairs = action.get('take_stairs')
         level_up = action.get('level_up')
@@ -123,11 +124,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 if entity.item and entity.x == player.x and entity.y == player.y:
                     pickup_results = player.inventory.add_item(entity)
                     player_turn_results.extend(pickup_results)
-
                     break
-                elif entity.name == 'Merchant':
-                    previous_game_state = game_state
-                    game_state = GameStates.SHOP_SCREEN
             else:
                 message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
 
@@ -159,6 +156,15 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     break
             else:
                 message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
+
+        if show_merchant and game_state == GameStates.PLAYERS_TURN:
+            for entity in entities:
+                if entity.name == 'Merchant' and entity.x == player.x and entity.y == player.y:
+                    message_log.add_message(Message('What would you like to buy?', libtcod.yellow))
+                    previous_game_state = game_state
+                    game_state = GameStates.SHOP_SCREEN
+                    break
+
 
         if level_up:
             if level_up == 'hp':

@@ -54,6 +54,9 @@ def handle_player_turn_keys(key):
     elif key_char == 'd':
         return {'drop_inventory': True}
 
+    elif key_char == 'm':
+        return {'show_merchant': True}
+
     elif key.vk == libtcod.KEY_ENTER:
         return {'take_stairs': True}
 
