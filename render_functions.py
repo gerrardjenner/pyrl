@@ -69,6 +69,12 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
         draw_entity(con, entity, fov_map, game_map)
     #draw followers on top?
 
+    # show info about entity under mouse
+    mouseinfo = get_names_under_mouse(mouse, entities, fov_map)
+    #if mouseinfo:
+    #    libtcod.console_print_ex(con, mouse.cx, mouse.cy, libtcod.BKGND_DARKEN, libtcod.RIGHT, mouseinfo)
+
+
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
 
     libtcod.console_set_default_background(panel, libtcod.black)
@@ -94,8 +100,9 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
                              'Dungeon level: {0}'.format(game_map.dungeon_level))
 
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
-    libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT,
-                             get_names_under_mouse(mouse, entities, fov_map))
+    libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, mouseinfo)
+
+
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
