@@ -16,6 +16,8 @@ def handle_keys(key, game_state):
         return handle_level_up_menu(key)
     elif game_state == GameStates.CHARACTER_SCREEN:
         return handle_character_screen(key)
+    elif game_state == GameStates.SHOP_SCREEN:
+        return handle_shop_screen(key)
 
     return {}
 
@@ -107,6 +109,21 @@ def handle_inventory_keys(key):
 
     return {}
 
+
+def handle_shop_screen(key):
+    index = key.c - ord('a')
+
+    if index >= 0:
+        return {'inventory_index': index}
+
+    if key.vk == libtcod.KEY_ENTER and key.lalt:
+        # Alt+Enter: toggle full screen
+        return {'fullscreen': True}
+    elif key.vk == libtcod.KEY_ESCAPE:
+        # Exit the menu
+        return {'exit': True}
+
+    return {}
 
 def handle_main_menu(key):
     key_char = chr(key.c)

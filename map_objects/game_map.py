@@ -7,6 +7,8 @@ from components.equippable import Equippable
 from components.fighter import Fighter
 from components.item import Item
 from components.stairs import Stairs
+from components.shop import Shop
+
 
 from entity import Entity
 
@@ -91,6 +93,11 @@ class GameMap:
                     #                      render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                     #    entities.append(follower)
 
+                    #add Merchant in first room
+                    shop_component = Shop(5)
+                    shop = Entity(new_room.x1+1, new_room.y1+1, 'M', libtcod.dark_red, 'Merchant', blocks=False,
+                                         render_order=RenderOrder.STAIRS, inventory = shop_component)
+                    entities.append(shop)
 
                 else:
                     # all rooms after the first:

@@ -13,7 +13,7 @@ from render_functions import clear_all, render_all
 
 from random import randint
 
-from pyrl.components.ai import Follower
+from components.ai import Follower
 
 
 def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, allies):
@@ -52,6 +52,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         move = action.get('move')
         wait = action.get('wait')
         pickup = action.get('pickup')
+
         show_inventory = action.get('show_inventory')
         drop_inventory = action.get('drop_inventory')
         inventory_index = action.get('inventory_index')
@@ -82,12 +83,15 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     player.move(dx, dy)
                     #if entity gold then add to gold
                     target = get_nonblocking_entities_at_location(entities, destination_x, destination_y)
-                    if target and target.name == 'Gold':
-                        #print(target.name)
-                        #player.inventory.add_item(target)
-                        pickup_results = player.inventory.use(target)
-                        player_turn_results.extend(pickup_results)
-                        entities.remove(target)
+                    if target:
+                        if target.name == 'Gold':
+                            #print(target.name)
+                            #player.inventory.add_item(target)
+                            pickup_results = player.inventory.use(target)
+                            player_turn_results.extend(pickup_results)
+                            entities.remove(target)
+                        elif target.name == 'Merchant':
+                            message_log.add_message(Message('Hello!', libtcod.green))
 
                     fov_recompute = True
 
@@ -121,6 +125,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     player_turn_results.extend(pickup_results)
 
                     break
+                elif entity.name == 'Merchant':
+                    previous_game_state = game_state
+                    game_state = GameStates.SHOP_SCREEN
             else:
                 message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
 
@@ -179,7 +186,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 player_turn_results.append({'targeting_cancelled': True})
 
         if exit:
-            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN):
+            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN, GameStates.SHOP_SCREEN):
                 game_state = previous_game_state
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})

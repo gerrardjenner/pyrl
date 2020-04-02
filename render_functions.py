@@ -5,7 +5,7 @@ from enum import Enum
 from components.ai import Follower
 from game_states import GameStates
 
-from menus import character_screen, inventory_menu, level_up_menu
+from menus import character_screen, inventory_menu, level_up_menu, shop_menu
 
 
 class RenderOrder(Enum):
@@ -112,6 +112,9 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
 
     elif game_state == GameStates.CHARACTER_SCREEN:
         character_screen(player, 30, 10, screen_width, screen_height)
+
+    elif game_state == GameStates.SHOP_SCREEN:
+        shop_menu(con, 'Welcome to my shop!', player, 50, screen_width, screen_height)
 
 
 def clear_all(con, entities):
