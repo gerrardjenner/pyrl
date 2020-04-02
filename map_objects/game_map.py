@@ -134,7 +134,7 @@ class GameMap:
         follower = Entity(center_of_last_room_x + 1, center_of_last_room_y + 1, 'A', libtcod.green,
                           'Follower', blocks=True,
                           render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
-        entities.append(follower)
+        #entities.append(follower)
         allies.append(follower)
 
 

@@ -40,7 +40,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
                              '{0}: {1}/{2}'.format(name, value, maximum))
 
 
-def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
+def render_all(con, panel, entities, allies, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
                bar_width, panel_height, panel_y, mouse, colors, game_state):
     if fov_recompute:
     # Draw all the tiles in the game map
@@ -68,6 +68,9 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
     for entity in entities_in_render_order:
         draw_entity(con, entity, fov_map, game_map)
     #draw followers on top?
+
+    for entity in allies:
+        draw_entity(con, entity, fov_map, game_map)
 
     # show info about entity under mouse
     mouseinfo = get_names_under_mouse(mouse, entities, fov_map)
@@ -124,8 +127,10 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
         shop_menu(con, 'Welcome to my shop!', player, 50, screen_width, screen_height)
 
 
-def clear_all(con, entities):
+def clear_all(con, entities, allies):
     for entity in entities:
+        clear_entity(con, entity)
+    for entity in allies:
         clear_entity(con, entity)
 
 

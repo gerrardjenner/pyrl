@@ -55,11 +55,19 @@ class Follower:
         results = []
 
         follower = self.owner
+        print('{0}, {1}'.format(follower.x, follower.y))
         if libtcod.map_is_in_fov(fov_map, follower.x, follower.y):
 
             if follower.distance_to(target) >= 2:
-                if follower.distance_to(target) > 1:
-                    follower.move_astar(target, entities, game_map)
+                follower.move_astar(target, entities, game_map)
+                #if follower.distance_to(target) > 1:
+                #    follower.move_astar(target, entities, game_map)
+            #elif follower.x == target.x and follower.y == target.y:
+            #    #on top of target - move away
+            #    e = target
+            #    e.x += randint(0,3)-1
+            #    e.y += randint(0,3)-1
+            #    follower.move_astar(e, entities, game_map)
 
             #elif target.fighter.hp > 0:
             #    attack_results = follower.fighter.attack(target)

@@ -9,7 +9,7 @@ keep track of follower stats
 enemies can target followers
 x followers continue through stairs
 x follower rendering on top of other entities
-1st follower follows player, next follower follows previous follower
+followers need to follow priority
 
 x hunger bar
 x apples

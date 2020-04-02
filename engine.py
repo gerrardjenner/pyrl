@@ -36,7 +36,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
                           constants['fov_algorithm'])
 
-        render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log,
+        render_all(con, panel, entities, allies, player, game_map, fov_map, fov_recompute, message_log,
                    constants['screen_width'], constants['screen_height'], constants['bar_width'],
                    constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state)
 
@@ -44,7 +44,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
         libtcod.console_flush()
 
-        clear_all(con, entities)
+        clear_all(con, entities, allies)
 
         action = handle_keys(key, game_state)
         mouse_action = handle_mouse(mouse)
@@ -80,6 +80,11 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     if not target.name == 'Follower':
                         attack_results = player.fighter.attack(target)
                         player_turn_results.extend(attack_results)
+                    else:
+                        #swap positions
+                        tempx, tempy = player.x, player.y
+                        player.x, player.y = destination_x, destination_y
+                        target.x, target.y = tempx, tempy
                 else:
                     player.move(dx, dy)
                     #if entity gold then add to gold
@@ -92,7 +97,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                             player_turn_results.extend(pickup_results)
                             entities.remove(target)
                         elif target.name == 'Merchant':
-                            message_log.add_message(Message('Hello!', libtcod.green))
+                            message_log.add_message(Message('Hello! Press M to shop', libtcod.green))
 
                     fov_recompute = True
 
@@ -282,10 +287,33 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     game_state = GameStates.LEVEL_UP
 
         if game_state == GameStates.ENEMY_TURN:
+            #ally movement - go through each one and get distance to target then a* follow in order or distance
+            asort = sorted(allies, key=lambda x:x.distance_to(player))
+            print(asort[0].distance_to(player))
+            enemy_turn_results = asort[0].ai.take_turn(player, fov_map, game_map, entities)
+            for a in range(1, len(asort)):
+                print(asort[a].distance_to(player))
+                enemy_turn_results = asort[a].ai.take_turn(asort[a-1], fov_map, game_map, entities)
+
+                for enemy_turn_result in enemy_turn_results:
+                    message = enemy_turn_result.get('message')
+                    dead_entity = enemy_turn_result.get('dead')
+
+                    if message:
+                        message_log.add_message(message)
+
+                    if dead_entity:
+                        if dead_entity == player:
+                            message, game_state = kill_player(dead_entity)
+                        else:
+                            message = kill_monster(dead_entity)
+
+                        message_log.add_message(message)
+
             for entity in entities:
                 if entity.ai:
-                    if isinstance(entity.ai, Follower) and len(allies) > 1:
-                        enemy_turn_results = entity.ai.take_turn(allies[-1], fov_map, game_map, entities)# player should be previous allies
+                    if isinstance(entity.ai, Follower):
+                        pass
                     else:
                         enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities)
 
