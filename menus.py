@@ -12,8 +12,11 @@ def menu(con, header, options, width, screen_width, screen_height):
     window = libtcod.console_new(width, height)
 
     # print the header, with auto-wrap
+    libtcod.console_set_default_background(window, libtcod.dark_red)
+    libtcod.console_rect(window, 0, 0, width, height, True, flag=libtcod.BKGND_SET)
     libtcod.console_set_default_foreground(window, libtcod.white)
-    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
+    libtcod.console_set_default_background(window, libtcod.azure)
+    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_SET, libtcod.LEFT, header)
 
     # print all the options
     y = header_height
@@ -48,20 +51,18 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
 
-def shop_menu(con, header, player, inventory_width, screen_width, screen_height):
+def shop_menu(con, header, player, inventory_width, screen_width, screen_height, shop):
     # show a menu with each item of the inventory as an option
-    if len(player.inventory.items) == 0:
+    #print(shop.inventory.capacity)
+    if len(shop.inventory.items) == 0:
         options = ['Inventory is empty.']
     else:
         options = []
 
-        for item in player.inventory.items:
-            if player.equipment.main_hand == item:
-                options.append('{0} (on main hand)'.format(item.name))
-            elif player.equipment.off_hand == item:
-                options.append('{0} (on off hand)'.format(item.name))
-            else:
-                options.append(item.name)
+        for item in shop.inventory.items:
+                #options.append('{0} (on main hand)'.format(item.name))
+                #options.append('{0} (on off hand)'.format(item.name))
+                options.append("{0} - {1} G".format(item.name, item.cost))
 
     menu(con, header, options, inventory_width, screen_width, screen_height)
 

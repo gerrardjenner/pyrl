@@ -6,7 +6,7 @@ from game_messages import Message
 
 
 class BasicMonster:
-    def take_turn(self, target, fov_map, game_map, entities):
+    def take_turn(self, target, fov_map, game_map, entities, allies):
         results = []
 
         monster = self.owner
@@ -19,7 +19,8 @@ class BasicMonster:
         if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
 
             if monster.distance_to(target) >= 2:
-                monster.move_astar(target, entities, game_map)
+                e = allies + entities
+                monster.move_astar(target, e, game_map)
 
             elif target.fighter.hp > 0:
                 attack_results = monster.fighter.attack(target)
@@ -33,7 +34,7 @@ class ConfusedMonster:
         self.previous_ai = previous_ai
         self.number_of_turns = number_of_turns
 
-    def take_turn(self, target, fov_map, game_map, entities):
+    def take_turn(self, target, fov_map, game_map, entities, allies):
         results = []
 
         if self.number_of_turns > 0:
@@ -41,7 +42,8 @@ class ConfusedMonster:
             random_y = self.owner.y + randint(0, 2) - 1
 
             if random_x != self.owner.x and random_y != self.owner.y:
-                self.owner.move_towards(random_x, random_y, game_map, entities)
+                e = entities + allies
+                self.owner.move_towards(random_x, random_y, game_map, e)
 
             self.number_of_turns -= 1
         else:
@@ -51,35 +53,37 @@ class ConfusedMonster:
         return results
 
 class Follower:
-    def take_turn(self, target, fov_map, game_map, entities):
+    def take_turn(self, target, fov_map, game_map, entities, allies):
         results = []
+        e = entities + allies
 
         follower = self.owner
         print('{0}, {1}'.format(follower.x, follower.y))
         if libtcod.map_is_in_fov(fov_map, follower.x, follower.y):
 
             if follower.distance_to(target) >= 2:
-                follower.move_astar(target, entities, game_map)
+                follower.move_astar(target, e, game_map)
                 #if follower.distance_to(target) > 1:
                 #    follower.move_astar(target, entities, game_map)
             #elif follower.x == target.x and follower.y == target.y:
             #    #on top of target - move away
-            #    e = target
-            #    e.x += randint(0,3)-1
-            #    e.y += randint(0,3)-1
-            #    follower.move_astar(e, entities, game_map)
+            #    f = target.x, target.y
+            #    f.x += randint(0,2)-1
+            #    f.y += randint(0,2)-1
+            #    follower.move_astar(f, e, game_map)
 
             #elif target.fighter.hp > 0:
             #    attack_results = follower.fighter.attack(target)
             #    results.extend(attack_results)
 
-        for e in entities:
-            if isinstance(e.ai, BasicMonster):
-                if libtcod.map_is_in_fov(fov_map, e.x, e.y):
-                    if follower.distance_to(e) >= 2:
-                        follower.move_astar(e, entities, game_map)
+        for f in e:
+            if isinstance(f.ai, BasicMonster):
+                if libtcod.map_is_in_fov(fov_map, f.x, f.y):
+                    if follower.distance_to(f) >= 2:
+                        follower.move_astar(f, e, game_map)
                     elif target.fighter.hp > 0:
-                        attack_results = follower.fighter.attack(e)
+                        print('Attack')
+                        attack_results = follower.fighter.attack(f)
                         results.extend(attack_results)
 
 

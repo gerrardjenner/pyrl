@@ -37,7 +37,7 @@ class GameMap:
 
         return tiles
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, allies):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, allies, shops):
         rooms = []
         num_rooms = 0
 
@@ -80,8 +80,31 @@ class GameMap:
 
                     j = 1
                     for i in allies:
-                        i.x = new_x + j
-                        i.y = new_y + j
+                        #need to place around player
+                        if j == 1:
+                            i.x = new_x + 1
+                            i.y = new_y + 1
+                        elif j ==2:
+                            i.x = new_x
+                            i.y = new_y + 1
+                        elif j ==3:
+                            i.x = new_x - 1
+                            i.y = new_y + 1
+                        elif j ==4:
+                            i.x = new_x - 1
+                            i.y = new_y
+                        elif j == 5:
+                            i.x = new_x - 1
+                            i.y = new_y - 1
+                        elif j == 6:
+                            i.x = new_x
+                            i.y = new_y - 1
+                        elif j == 7:
+                            i.x = new_x + 1
+                            i.y = new_y - 1
+                        elif j == 8:
+                            i.x = new_x + 1
+                            i.y = new_y
                         j += 1
                     #for i in range(self.dungeon_level):
                     #    # add Follower
@@ -95,9 +118,25 @@ class GameMap:
 
                     #add Merchant in first room
                     shop_component = Shop(5)
+
+                    item_component = Item(use_function=heal, amount=40)
+                    item = Entity(-1, -1, '!', libtcod.violet, 'Healing Potion', render_order=RenderOrder.ITEM, item=item_component, cost=20)
+                    shop_component.add_item(item)
+
+                    item_component = Item(use_function=eat, amount=40)
+                    item = Entity(-1, -1, 'a', libtcod.red, 'Apple', render_order=RenderOrder.ITEM, item=item_component, cost=30)
+                    shop_component.add_item(item)
+
+                    item_component = Item(use_function=clean, amount=100)
+                    item = Entity(-1, -1, 'b', libtcod.red, 'Hand Sanitiser', render_order=RenderOrder.ITEM, item=item_component, cost=40)
+                    shop_component.add_item(item)
+
                     shop = Entity(new_room.x1+1, new_room.y1+1, 'M', libtcod.dark_red, 'Merchant', blocks=False,
                                          render_order=RenderOrder.STAIRS, inventory = shop_component)
+                    #print(shop)
                     entities.append(shop)
+                    shops.append(shop)
+                    #print(shops[0].inventory.items)
 
                 else:
                     # all rooms after the first:
@@ -134,6 +173,7 @@ class GameMap:
         follower = Entity(center_of_last_room_x + 1, center_of_last_room_y + 1, 'A', libtcod.green,
                           'Follower', blocks=True,
                           render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+
         #entities.append(follower)
         allies.append(follower)
 
@@ -258,16 +298,16 @@ class GameMap:
 
         return False
 
-    def next_floor(self, player, message_log, constants, allies):
+    def next_floor(self, player, message_log, constants, allies, shops):
         self.dungeon_level += 1
 
         entities = [player]
-        for i in allies:
-            entities.append(i)
+        #entities += allies
+        shops = []
 
         self.tiles = self.initialize_tiles()
         self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'], player, entities, allies)
+                      constants['map_width'], constants['map_height'], player, entities, allies, shops)
 
         player.fighter.heal(player.fighter.max_hp // 2)
         player.fighter.eat(100)

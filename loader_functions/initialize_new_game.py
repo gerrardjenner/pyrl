@@ -20,7 +20,7 @@ from render_functions import RenderOrder
 
 
 def get_constants():
-    window_title = 'Roguelike Tutorial Revised'
+    window_title = 'pyrl'
 
     screen_width = 80
     screen_height = 50
@@ -81,7 +81,7 @@ def get_constants():
 
 
 def get_game_variables(constants):
-    fighter_component = Fighter(hp=100, defense=1, power=2, xp=0, gold=10)
+    fighter_component = Fighter(hp=100, defense=1, power=2, xp=0, gold=100)
     inventory_component = Inventory(26)
     level_component = Level()
     equipment_component = Equipment()
@@ -90,6 +90,7 @@ def get_game_variables(constants):
                     equipment=equipment_component)
     entities = [player]
     allies = []
+    shops = []
 
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
     dagger = Entity(0, 0, '-', libtcod.sky, 'Dagger', equippable=equippable_component)
@@ -98,10 +99,10 @@ def get_game_variables(constants):
 
     game_map = GameMap(constants['map_width'], constants['map_height'])
     game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'], player, entities, allies)
+                      constants['map_width'], constants['map_height'], player, entities, allies, shops)
 
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
 
     game_state = GameStates.PLAYERS_TURN
 
-    return player, entities, game_map, message_log, game_state, allies
+    return player, entities, game_map, message_log, game_state, allies, shops

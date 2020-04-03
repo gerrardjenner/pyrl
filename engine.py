@@ -16,7 +16,7 @@ from random import randint
 from components.ai import Follower
 
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, allies):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, allies, shops):
     fov_recompute = True
 
     fov_map = initialize_fov(game_map)
@@ -29,6 +29,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
     targeting_item = None
 
+    #print(shops)
+
     while not libtcod.console_is_window_closed():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
@@ -38,7 +40,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
         render_all(con, panel, entities, allies, player, game_map, fov_map, fov_recompute, message_log,
                    constants['screen_width'], constants['screen_height'], constants['bar_width'],
-                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state)
+                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, shops)
 
         fov_recompute = False
 
@@ -57,6 +59,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         drop_inventory = action.get('drop_inventory')
         show_merchant = action.get('show_merchant')
         inventory_index = action.get('inventory_index')
+        shop_index = action.get('shop_index')
         take_stairs = action.get('take_stairs')
         level_up = action.get('level_up')
         show_character_screen = action.get('show_character_screen')
@@ -150,10 +153,21 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             elif game_state == GameStates.DROP_INVENTORY:
                 player_turn_results.extend(player.inventory.drop_item(item))
 
+        if shop_index is not None and previous_game_state != GameStates.PLAYER_DEAD and shop_index < len(shops[0].inventory.items):
+            item = shops[0].inventory.items[shop_index]
+
+            if game_state == GameStates.SHOP_SCREEN:
+                if player.fighter.gold > item.cost:
+                    player.fighter.gold -= item.cost
+                    shops[0].inventory.remove_item(item)
+                    entities.append(item)
+                    player_turn_results.extend(player.inventory.add_item(item))
+
+
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
                 if entity.stairs and entity.x == player.x and entity.y == player.y:
-                    entities = game_map.next_floor(player, message_log, constants, allies)
+                    entities = game_map.next_floor(player, message_log, constants, allies, shops)
                     fov_map = initialize_fov(game_map)
                     fov_recompute = True
                     libtcod.console_clear(con)
@@ -202,7 +216,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
             else:
-                save_game(player, entities, game_map, message_log, game_state, allies)
+                save_game(player, entities, game_map, message_log, game_state, allies, shops)
 
                 return True
 
@@ -289,15 +303,21 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         if game_state == GameStates.ENEMY_TURN:
             #ally movement - go through each one and get distance to target then a* follow in order or distance
             asort = sorted(allies, key=lambda x:x.distance_to(player))
-            print(asort[0].distance_to(player))
-            enemy_turn_results = asort[0].ai.take_turn(player, fov_map, game_map, entities)
-            for a in range(1, len(asort)):
-                print(asort[a].distance_to(player))
-                enemy_turn_results = asort[a].ai.take_turn(asort[a-1], fov_map, game_map, entities)
+            #print(asort[0].distance_to(player))
+            #enemy_turn_results = asort[0].ai.take_turn(player, fov_map, game_map, entities, allies)
+            #print(len(enemy_turn_results))
+            for a in range(0, len(asort)):
+                if a == 0:
+                    enemy_turn_results = asort[0].ai.take_turn(player, fov_map, game_map, entities, allies)
+                else:
+                    enemy_turn_results = asort[a].ai.take_turn(asort[a-1], fov_map, game_map, entities, allies)
+
 
                 for enemy_turn_result in enemy_turn_results:
                     message = enemy_turn_result.get('message')
                     dead_entity = enemy_turn_result.get('dead')
+                    print(message)
+                    print(dead_entity)
 
                     if message:
                         message_log.add_message(message)
@@ -309,13 +329,13 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                             message = kill_monster(dead_entity)
 
                         message_log.add_message(message)
-
+            #do enemies - also account for followers in pathing etc
             for entity in entities:
                 if entity.ai:
                     if isinstance(entity.ai, Follower):
                         pass
                     else:
-                        enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities)
+                        enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities, allies)
 
                     for enemy_turn_result in enemy_turn_results:
                         message = enemy_turn_result.get('message')
@@ -352,6 +372,8 @@ def main():
     panel = libtcod.console_new(constants['screen_width'], constants['panel_height'])
 
     player = None
+    shops = []
+    allies = []
     entities = []
     game_map = None
     message_log = None
@@ -386,13 +408,13 @@ def main():
             if show_load_error_message and (new_game or load_saved_game or exit_game):
                 show_load_error_message = False
             elif new_game:
-                player, entities, game_map, message_log, game_state, allies = get_game_variables(constants)
+                player, entities, game_map, message_log, game_state, allies, shops = get_game_variables(constants)
                 game_state = GameStates.PLAYERS_TURN
 
                 show_main_menu = False
             elif load_saved_game:
                 try:
-                    player, entities, game_map, message_log, game_state, allies = load_game()
+                    player, entities, game_map, message_log, game_state, allies, shops = load_game()
                     show_main_menu = False
                 except FileNotFoundError:
                     show_load_error_message = True
@@ -401,7 +423,7 @@ def main():
 
         else:
             libtcod.console_clear(con)
-            play_game(player, entities, game_map, message_log, game_state, con, panel, constants, allies)
+            play_game(player, entities, game_map, message_log, game_state, con, panel, constants, allies, shops)
 
             show_main_menu = True
 

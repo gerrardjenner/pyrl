@@ -8,15 +8,30 @@ class Shop:
         self.capacity = capacity
         self.items = []
 
-    #sell item to the shop - pass in Inventory?
+    #put items into the inventory
     def add_item(self, item):
         results = []
 
-        results.append({'item_removed': item, 'message': Message('You pick up the {0}!'.format(item.name), libtcod.gold)})
-        self.items.remove(item)
-        #gold += price
-
+        if len(self.items) >= self.capacity:
+            results.append({
+                'item_added': None,
+                'message': Message('You cannot carry any more, your inventory is full', libtcod.yellow)
+            })
+        else:
+            self.items.append(item)
+            results.append({
+                'item_added': item,
+                'message': Message('Added {0} to shop!'.format(item.name), libtcod.lighter_grey)
+            })
         return results
+
+    #sell items from the shops inventory
+    def buy(self, item):
+        results = []
+
+            # if player has enough gold
+            # gold -= price
+
 
     def use(self, item_entity, **kwargs):
         results = []
@@ -47,20 +62,15 @@ class Shop:
 
     #buy item from the shop
     def remove_item(self, item):
-        if len(self.items) >= self.capacity:
-            results.append({
-                'item_added': None,
-                'message': Message('You cannot carry any more, your inventory is full', libtcod.yellow)
-            })
-        else:
-            #if player has enough gold
-            #gold -= price
-            results.append({
-                'item_added': item,
-                'message': Message('You purchased the {0}!'.format(item.name), libtcod.lighter_grey)
-            })
+        results = []
+        #if player has enough gold
+        #gold -= price
+        results.append({
+            'item_sold': item,
+            'message': Message('You purchased the {0}!'.format(item.name), libtcod.lighter_grey)
+        })
 
-            self.items.append(item)
+        self.items.remove(item)
 
         return results
 
