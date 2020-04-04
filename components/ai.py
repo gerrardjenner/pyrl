@@ -82,7 +82,7 @@ class Follower:
                     if follower.distance_to(f) >= 2:
                         follower.move_astar(f, e, game_map)
                     elif target.fighter.hp > 0:
-                        print('Attack')
+                        #print('Attack')
                         attack_results = follower.fighter.attack(f)
                         results.extend(attack_results)
 

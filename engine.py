@@ -101,26 +101,10 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                             entities.remove(target)
                         elif target.name == 'Merchant':
                             message_log.add_message(Message('Hello! Press M to shop', libtcod.green))
+                        elif target.stairs:
+                            message_log.add_message(Message('Press Enter to take stairs', libtcod.green))
 
                     fov_recompute = True
-
-                # have a percent chance to increase hunger
-                if randint(0,10) < 3:
-                    player.fighter.hunger += 1
-                    if player.fighter.contact > 1:
-                        player.fighter.contact += 1
-
-                if player.fighter.hunger > 99:
-                    player.fighter.hunger = 100
-                    # take damage
-                    player.fighter.take_damage(1)
-                    message_log.add_message(Message('Hunger Pain!', libtcod.lighter_red))
-
-                if player.fighter.contact > 99:
-                    player.fighter.contact = 100
-                    # take damage
-                    player.fighter.take_damage(10)
-                    message_log.add_message(Message('Infected!', libtcod.lighter_yellow))
 
                 game_state = GameStates.ENEMY_TURN
 
@@ -157,7 +141,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             item = shops[0].inventory.items[shop_index]
 
             if game_state == GameStates.SHOP_SCREEN:
-                if player.fighter.gold > item.cost:
+                if player.fighter.gold >= item.cost:
                     player.fighter.gold -= item.cost
                     shops[0].inventory.remove_item(item)
                     entities.append(item)
@@ -241,6 +225,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             if dead_entity:
                 if dead_entity == player:
                     message, game_state = kill_player(dead_entity)
+                    if game_state == GameStates.PLAYER_DEAD:
+                        break
                 else:
                     message = kill_monster(dead_entity)
 
@@ -316,8 +302,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 for enemy_turn_result in enemy_turn_results:
                     message = enemy_turn_result.get('message')
                     dead_entity = enemy_turn_result.get('dead')
-                    print(message)
-                    print(dead_entity)
+                    #print(message)
+                    #print(dead_entity)
 
                     if message:
                         message_log.add_message(message)
@@ -329,7 +315,50 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                             message = kill_monster(dead_entity)
 
                         message_log.add_message(message)
+
+            # have a percent chance to increase hunger
+            if randint(0, 10) < 3:
+                player.fighter.hunger += 1
+                if player.fighter.contact > 1:
+                    player.fighter.contact += 1
+
+            if player.fighter.hunger > 99:
+                player.fighter.hunger = 100
+                message_log.add_message(Message('Hunger Pain!', libtcod.lighter_red))
+                # take damage
+                enemy_turn_results = player.fighter.take_damage(1)
+                #enemy_turn_results.append(move_results)
+
+            if player.fighter.contact > 99:
+                player.fighter.contact = 100
+                message_log.add_message(Message('Infected!', libtcod.lighter_yellow))
+                # take damage
+                enemy_turn_results = player.fighter.take_damage(10)
+                #enemy_turn_results.append(move_results)
+
+            for enemy_turn_result in enemy_turn_results:
+                message = enemy_turn_result.get('message')
+                dead_entity = enemy_turn_result.get('dead')
+
+                if message:
+                    message_log.add_message(message)
+
+                if dead_entity:
+                    if dead_entity == player:
+                        message, game_state = kill_player(dead_entity)
+                    else:
+                        message = kill_monster(dead_entity)
+
+                    message_log.add_message(message)
+
+                    if game_state == GameStates.PLAYER_DEAD:
+                        break
+
+
             #do enemies - also account for followers in pathing etc
+
+
+
             for entity in entities:
                 if entity.ai:
                     if isinstance(entity.ai, Follower):

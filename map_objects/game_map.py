@@ -37,6 +37,79 @@ class GameMap:
 
         return tiles
 
+    def make_boss_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, allies, shops):
+        rooms = []
+        num_rooms = 0
+        #2 rooms - small room to enter in connected to larger room
+
+        for i in range (0,2):
+
+            # random width and height
+            w = randint(room_min_size+(i*10), room_max_size+(1*10))
+            h = randint(room_min_size+(i*10), room_max_size+(1*10))
+            # random position without going out of the boundaries of the map
+            x = randint(0, map_width - w - 1)
+            y = randint(0, map_height - h - 1)
+
+            # "Rect" class makes rectangles easier to work with
+            new_room = Rect(x, y, w, h)
+
+            # "paint" it to the map's tiles
+            self.create_room(new_room)
+
+            # center coordinates of new room, will be useful later
+            (new_x, new_y) = new_room.center()
+
+            center_of_last_room_x = new_x
+            center_of_last_room_y = new_y
+
+            if i == 0:
+                # this is the first room, where the player starts at
+                player.x = new_x
+                player.y = new_y
+
+                self.place_allies(player, allies)
+            else:
+                # all rooms after the first:
+                # connect it to the previous room with a tunnel
+
+                # center coordinates of previous room
+                (prev_x, prev_y) = rooms[num_rooms - 1].center()
+
+                # flip a coin (random number that is either 0 or 1)
+                if randint(0, 1) == 1:
+                    # first move horizontally, then vertically
+                    self.create_h_tunnel(prev_x, new_x, prev_y)
+                    self.create_v_tunnel(prev_y, new_y, new_x)
+                else:
+                    # first move vertically, then horizontally
+                    self.create_v_tunnel(prev_y, new_y, prev_x)
+                    self.create_h_tunnel(prev_x, new_x, new_y)
+
+                # boss room
+
+                fighter_component = Fighter(hp=60, defense=2, power=8, xp=300)
+                ai_component = BasicMonster()
+
+                monster = Entity(new_x, new_y, 'H', libtcod.darker_flame, 'Haggard Beast', blocks=True, fighter=fighter_component,
+                                 render_order=RenderOrder.ACTOR, ai=ai_component)
+
+                entities.append(monster)
+
+                stairs_component = Stairs(self.dungeon_level + 1)
+                down_stairs = Entity(center_of_last_room_x, center_of_last_room_y, '>', libtcod.white, 'Stairs',
+                                     render_order=RenderOrder.STAIRS, stairs=stairs_component)
+                entities.append(down_stairs)
+
+            rooms.append(new_room)
+            num_rooms += 1
+
+
+
+
+
+
+
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, allies, shops):
         rooms = []
         num_rooms = 0
@@ -45,6 +118,7 @@ class GameMap:
         center_of_last_room_y = None
         #center_of_first_room_x = None
         #center_of_first_room_y = None
+
 
         for r in range(max_rooms):
             # random width and height
@@ -78,43 +152,7 @@ class GameMap:
                     player.x = new_x
                     player.y = new_y
 
-                    j = 1
-                    for i in allies:
-                        #need to place around player
-                        if j == 1:
-                            i.x = new_x + 1
-                            i.y = new_y + 1
-                        elif j ==2:
-                            i.x = new_x
-                            i.y = new_y + 1
-                        elif j ==3:
-                            i.x = new_x - 1
-                            i.y = new_y + 1
-                        elif j ==4:
-                            i.x = new_x - 1
-                            i.y = new_y
-                        elif j == 5:
-                            i.x = new_x - 1
-                            i.y = new_y - 1
-                        elif j == 6:
-                            i.x = new_x
-                            i.y = new_y - 1
-                        elif j == 7:
-                            i.x = new_x + 1
-                            i.y = new_y - 1
-                        elif j == 8:
-                            i.x = new_x + 1
-                            i.y = new_y
-                        j += 1
-                    #for i in range(self.dungeon_level):
-                    #    # add Follower
-                    #    fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
-                    #    ai_component = Follower()
-                    #    # blocks true - pushable true?
-                    #    follower = Entity(center_of_last_room_x + i, center_of_last_room_y + i, 'A', libtcod.green,
-                    #                      'Follower', blocks=False,
-                    #                      render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
-                    #    entities.append(follower)
+                    self.place_allies(player, allies)
 
                     #add Merchant in first room
                     shop_component = Shop(5)
@@ -195,6 +233,39 @@ class GameMap:
         for y in range(min(y1, y2), max(y1, y2) + 1):
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
+
+    def place_allies(self, target, allies):
+        j = 1
+        new_x = target.x
+        new_y = target.y
+
+        for i in allies:
+            # need to place around player
+            if j == 1:
+                i.x = new_x + 1
+                i.y = new_y + 1
+            elif j == 2:
+                i.x = new_x
+                i.y = new_y + 1
+            elif j == 3:
+                i.x = new_x - 1
+                i.y = new_y + 1
+            elif j == 4:
+                i.x = new_x - 1
+                i.y = new_y
+            elif j == 5:
+                i.x = new_x - 1
+                i.y = new_y - 1
+            elif j == 6:
+                i.x = new_x
+                i.y = new_y - 1
+            elif j == 7:
+                i.x = new_x + 1
+                i.y = new_y - 1
+            elif j == 8:
+                i.x = new_x + 1
+                i.y = new_y
+            j += 1
 
     def place_entities(self, room, entities):
         max_monsters_per_room = from_dungeon_level([[2, 1], [3, 4], [5, 6]], self.dungeon_level)
@@ -303,11 +374,16 @@ class GameMap:
 
         entities = [player]
         #entities += allies
-        shops = []
+        shops.clear()
 
         self.tiles = self.initialize_tiles()
-        self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'], player, entities, allies, shops)
+        if self.dungeon_level % 5 == 0:
+            self.make_boss_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
+                               constants['map_width'], constants['map_height'], player, entities, allies, shops)
+        else:
+            self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, allies, shops)
+
+
 
         player.fighter.heal(player.fighter.max_hp // 2)
         player.fighter.eat(100)
