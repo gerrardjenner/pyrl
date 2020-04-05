@@ -9,6 +9,8 @@ from components.level import Level
 from entity import Entity
 
 from equipment_slots import EquipmentSlots
+from components.item import Item
+from item_functions import locate_ally
 
 from game_messages import MessageLog
 
@@ -85,7 +87,7 @@ def get_game_variables(constants):
     inventory_component = Inventory(26)
     level_component = Level()
     equipment_component = Equipment()
-    player = Entity(0, 0, '@', libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
+    player = Entity(0, 0, 2, libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
                     fighter=fighter_component, inventory=inventory_component, level=level_component,
                     equipment=equipment_component)
     entities = [player]
@@ -96,6 +98,10 @@ def get_game_variables(constants):
     dagger = Entity(0, 0, '-', libtcod.sky, 'Dagger', equippable=equippable_component)
     player.inventory.add_item(dagger)
     player.equipment.toggle_equip(dagger)
+
+    item_component = Item(use_function=locate_ally, alist=allies)
+    item = Entity(0, 0, 'j', libtcod.red, 'Locate Ally', render_order=RenderOrder.ITEM, item=item_component, cost=40)
+    player.inventory.add_item(item)
 
     game_map = GameMap(constants['map_width'], constants['map_height'])
     game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],

@@ -4,3 +4,7 @@ pyinstaller --noconfirm  ^
     --add-data="*.png;." ^
     --name pyrl ^
     engine.py
+
+
+
+powershell Compress-Archive -Path dist/pyrl -DestinationPath dist/pyrl.zip -Update

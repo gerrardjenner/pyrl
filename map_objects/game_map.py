@@ -14,7 +14,7 @@ from entity import Entity
 
 from game_messages import Message
 
-from item_functions import cast_confuse, cast_fireball, cast_lightning, heal, acquire_gold, eat, clean
+from item_functions import cast_confuse, cast_fireball, cast_lightning, heal, acquire_gold, eat, clean, locate_ally
 
 from map_objects.rectangle import Rect
 from map_objects.tile import Tile
@@ -169,6 +169,10 @@ class GameMap:
                     item = Entity(-1, -1, 'b', libtcod.red, 'Hand Sanitiser', render_order=RenderOrder.ITEM, item=item_component, cost=40)
                     shop_component.add_item(item)
 
+                    item_component = Item(use_function=locate_ally, alist=allies)
+                    item = Entity(-1, -1, 'j', libtcod.red, 'Locate Ally', render_order=RenderOrder.ITEM, item=item_component, cost=40)
+                    shop_component.add_item(item)
+
                     shop = Entity(new_room.x1+1, new_room.y1+1, 'M', libtcod.dark_red, 'Merchant', blocks=False,
                                          render_order=RenderOrder.STAIRS, inventory = shop_component)
                     #print(shop)
@@ -208,9 +212,10 @@ class GameMap:
         fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
         ai_component = Follower()
         # blocks true - pushable true?
-        follower = Entity(center_of_last_room_x + 1, center_of_last_room_y + 1, 'A', libtcod.green,
+        follower = Entity(center_of_last_room_x + 1, center_of_last_room_y + 1, 1, libtcod.green,
                           'Follower', blocks=True,
                           render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+        #print(follower.ai.found)
 
         #entities.append(follower)
         allies.append(follower)

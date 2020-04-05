@@ -7,9 +7,12 @@ blacksmith - boost item
 Make follower pushable
 keep track of follower stats
 enemies can target followers
+followers can take damage
+followers can level up
 x followers continue through stairs
 x follower rendering on top of other entities
-followers need to follow priority
+x followers need to follow priority
+
 
 x hunger bar
 x apples
@@ -28,3 +31,5 @@ wash hands/eat between floors
 check for death by hunger/contact
 
 mouse hover tooltip panel
+numpad menu
+different fonts

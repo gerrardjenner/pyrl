@@ -16,7 +16,7 @@ from random import randint
 from components.ai import Follower
 
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, allies, shops):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, mpanel, constants, allies, shops):
     fov_recompute = True
 
     fov_map = initialize_fov(game_map)
@@ -34,17 +34,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
     while not libtcod.console_is_window_closed():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
-        if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
-                          constants['fov_algorithm'])
-
-        render_all(con, panel, entities, allies, player, game_map, fov_map, fov_recompute, message_log,
-                   constants['screen_width'], constants['screen_height'], constants['bar_width'],
-                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, shops)
-
-        fov_recompute = False
-
-        libtcod.console_flush()
+        #
 
         clear_all(con, entities, allies)
 
@@ -70,6 +60,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         right_click = mouse_action.get('right_click')
 
         player_turn_results = []
+        enemy_turn_results = []
+        ally_turn_results = []
+        floor_turn_results = []
 
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
@@ -286,24 +279,34 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     previous_game_state = game_state
                     game_state = GameStates.LEVEL_UP
 
+
+
+
+
+
+
         if game_state == GameStates.ENEMY_TURN:
-            #ally movement - go through each one and get distance to target then a* follow in order or distance
-            asort = sorted(allies, key=lambda x:x.distance_to(player))
-            #print(asort[0].distance_to(player))
-            #enemy_turn_results = asort[0].ai.take_turn(player, fov_map, game_map, entities, allies)
-            #print(len(enemy_turn_results))
+
+            #if game_state == GameStates.ALLIES_TURN:
+            # Do Allies turns
+            # ally movement - go through each one and get distance to target then a* follow in order or distance
+            asort = sorted(allies, key=lambda x: x.distance_to(player))
+            # print(asort[0].distance_to(player))
+            # ally_turn_results = asort[0].ai.take_turn(player, fov_map, game_map, entities, allies)
+            # print(len(ally_turn_results))
             for a in range(0, len(asort)):
                 if a == 0:
-                    enemy_turn_results = asort[0].ai.take_turn(player, fov_map, game_map, entities, allies)
+                    ally_turn_results = asort[0].ai.take_turn(player, fov_map, game_map, entities, allies)
                 else:
-                    enemy_turn_results = asort[a].ai.take_turn(asort[a-1], fov_map, game_map, entities, allies)
+                    ally_turn_results = asort[a].ai.take_turn(asort[a - 1], fov_map, game_map, entities, allies)
 
-
-                for enemy_turn_result in enemy_turn_results:
-                    message = enemy_turn_result.get('message')
-                    dead_entity = enemy_turn_result.get('dead')
-                    #print(message)
-                    #print(dead_entity)
+                for ally_turn_result in ally_turn_results:
+                    print("Follower {0}".format(a))
+                    message = ally_turn_result.get('message')
+                    dead_entity = ally_turn_result.get('dead')
+                    xp = ally_turn_result.get('xp')
+                    # print(message)
+                    # print(dead_entity)
 
                     if message:
                         message_log.add_message(message)
@@ -315,6 +318,15 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                             message = kill_monster(dead_entity)
 
                         message_log.add_message(message)
+                    if xp:
+                        leveled_up = player.level.add_xp(xp)
+                        message_log.add_message(Message('You gain {0} experience points.'.format(xp)))
+
+                        if leveled_up:
+                            print('Level Up')
+                            previous_game_state = game_state
+                            game_state = GameStates.LEVEL_UP
+                            break
 
             # have a percent chance to increase hunger
             if randint(0, 10) < 3:
@@ -326,19 +338,19 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 player.fighter.hunger = 100
                 message_log.add_message(Message('Hunger Pain!', libtcod.lighter_red))
                 # take damage
-                enemy_turn_results = player.fighter.take_damage(1)
-                #enemy_turn_results.append(move_results)
+                floor_turn_results = player.fighter.take_damage(1)
+                # floor_turn_results.append(move_results)
 
             if player.fighter.contact > 99:
                 player.fighter.contact = 100
                 message_log.add_message(Message('Infected!', libtcod.lighter_yellow))
                 # take damage
-                enemy_turn_results = player.fighter.take_damage(10)
-                #enemy_turn_results.append(move_results)
+                floor_turn_results = player.fighter.take_damage(10)
+                # floor_turn_results.append(move_results)
 
-            for enemy_turn_result in enemy_turn_results:
-                message = enemy_turn_result.get('message')
-                dead_entity = enemy_turn_result.get('dead')
+            for floor_turn_result in floor_turn_results:
+                message = floor_turn_result.get('message')
+                dead_entity = floor_turn_result.get('dead')
 
                 if message:
                     message_log.add_message(message)
@@ -354,6 +366,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     if game_state == GameStates.PLAYER_DEAD:
                         break
 
+            ###
 
             #do enemies - also account for followers in pathing etc
 
@@ -389,16 +402,33 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             else:
                 game_state = GameStates.PLAYERS_TURN
 
+        if fov_recompute:
+            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
+                          constants['fov_algorithm'])
+
+        render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, fov_recompute, message_log,
+                   constants['screen_width'], constants['screen_height'], constants['bar_width'],
+                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, shops)
+
+        fov_recompute = False
+
+        libtcod.console_flush()
+
 
 def main():
     constants = get_constants()
 
-    libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
+    #libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
+    #libtcod.console_set_custom_font('terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
+    #libtcod.console_set_custom_font('dejavu_wide16x16_gs_tc.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
+    libtcod.console_set_custom_font('terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
+
 
     libtcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['window_title'], False)
 
     con = libtcod.console_new(constants['screen_width'], constants['screen_height'])
     panel = libtcod.console_new(constants['screen_width'], constants['panel_height'])
+    mpanel = libtcod.console_new(constants['screen_width'], constants['screen_height'])
 
     player = None
     shops = []
@@ -452,7 +482,7 @@ def main():
 
         else:
             libtcod.console_clear(con)
-            play_game(player, entities, game_map, message_log, game_state, con, panel, constants, allies, shops)
+            play_game(player, entities, game_map, message_log, game_state, con, panel, mpanel, constants, allies, shops)
 
             show_main_menu = True
 

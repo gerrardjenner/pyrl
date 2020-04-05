@@ -150,3 +150,16 @@ def cast_confuse(*args, **kwargs):
             {'consumed': False, 'message': Message('There is no targetable enemy at that location.', libtcod.yellow)})
 
     return results
+
+
+
+def locate_ally(*args, **kwargs):
+    results = []
+
+    allies = kwargs.get('alist')
+    #print(allies[-1].ai.found)
+    allies[-1].ai.found = True
+
+    results.append({'consumed': True, 'message': Message('You reach out with your mind and sense an ally nearby!', libtcod.light_green)})
+
+    return results

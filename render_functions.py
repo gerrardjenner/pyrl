@@ -40,7 +40,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
                              '{0}: {1}/{2}'.format(name, value, maximum))
 
 
-def render_all(con, panel, entities, allies, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
+def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
                bar_width, panel_height, panel_y, mouse, colors, game_state, shops):
     if fov_recompute:
     # Draw all the tiles in the game map
@@ -51,16 +51,24 @@ def render_all(con, panel, entities, allies, player, game_map, fov_map, fov_reco
 
                 if visible:
                     if wall:
-                        libtcod.console_set_char_background(con, x, y, colors.get('light_wall'), libtcod.BKGND_SET)
+                        #libtcod.console_set_char_background(con, x, y, colors.get('light_wall'), libtcod.BKGND_SET)
+                        libtcod.console_set_default_foreground(con, colors.get('light_wall'))
+                        libtcod.console_put_char(con, x, y, 178, libtcod.BKGND_SET)
                     else:
                         libtcod.console_set_char_background(con, x, y, colors.get('light_ground'), libtcod.BKGND_SET)
+                        #libtcod.console_set_default_foreground(con, colors.get('light_ground'))
+                        #libtcod.console_put_char(con, x, y, 250, libtcod.BKGND_OVERLAY)
 
                     game_map.tiles[x][y].explored = True
                 elif game_map.tiles[x][y].explored:
                     if wall:
-                        libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
+                        #libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
+                        libtcod.console_set_default_foreground(con, colors.get('dark_wall'))
+                        libtcod.console_put_char(con, x, y, 178, libtcod.BKGND_SET)
+
                     else:
                         libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)
+                        #libtcod.console_put_char(con, x, y, ' ', libtcod.BKGND_OVERLAY)
 
     entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
 
@@ -78,8 +86,6 @@ def render_all(con, panel, entities, allies, player, game_map, fov_map, fov_reco
 
     # show info about entity under mouse
     mouseinfo = get_names_under_mouse(mouse, entities, fov_map)
-    #if mouseinfo:
-    #    libtcod.console_print_ex(con, mouse.cx, mouse.cy, libtcod.BKGND_DARKEN, libtcod.RIGHT, mouseinfo)
 
 
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
@@ -103,15 +109,24 @@ def render_all(con, panel, entities, allies, player, game_map, fov_map, fov_reco
 
     libtcod.console_print_ex(panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT,
                              'Gold: {0}'.format(player.fighter.gold))
+    libtcod.console_print_ex(panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT,
+                             'XP: {0}'.format(player.level.current_xp))
     libtcod.console_print_ex(panel, 1, 6, libtcod.BKGND_NONE, libtcod.LEFT,
                              'Dungeon level: {0}'.format(game_map.dungeon_level))
 
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
     libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, mouseinfo)
 
+    if mouseinfo:
+        libtcod.console_print_ex(mpanel, mouse.cx, mouse.cy, libtcod.BKGND_OVERLAY, libtcod.RIGHT, mouseinfo)
+    #else:
+    #    #show mouse
+    #    #libtcod.console_set_char_background(mpanel, mouse.cx, mouse.cy, libtcod.desaturated_red, libtcod.BKGND_SET)
 
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
+
+    #libtcod.console_blit(mpanel, 0, 0, screen_width, screen_height, 0, 0, 0)
 
     if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
         if game_state == GameStates.SHOW_INVENTORY:
@@ -140,10 +155,14 @@ def clear_all(con, entities, allies):
 
 
 def draw_entity(con, entity, fov_map, game_map):
-    if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or entity.item:
-        if entity.item and not game_map.tiles[entity.x][entity.y].explored or entity.ai == Follower and not game_map.tiles[entity.x][entity.y].explored:
+    #if (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or entity.item or libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+    if  (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or entity.item or isinstance(entity.ai, Follower) or libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+        if entity.item and not game_map.tiles[entity.x][entity.y].explored:
             libtcod.console_set_default_foreground(con, libtcod.white)
             libtcod.console_put_char(con, entity.x, entity.y, '+', libtcod.BKGND_NONE)
+        elif isinstance(entity.ai, Follower) and not entity.ai.found:
+            libtcod.console_set_default_foreground(con, entity.color)
+            libtcod.console_put_char(con, entity.x, entity.y, ' ', libtcod.BKGND_NONE)
         else:
             libtcod.console_set_default_foreground(con, entity.color)
             libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
