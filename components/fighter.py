@@ -86,3 +86,6 @@ class Fighter:
 
         if self.contact < 0:
             self.contact = 0
+
+    def clean_area(self, target):
+        print('cleaning')

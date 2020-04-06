@@ -13,6 +13,7 @@ class RenderOrder(Enum):
     CORPSE = 2
     ITEM = 3
     ACTOR = 4
+    HIDDEN = 5
 
 
 def get_names_under_mouse(mouse, entities, fov_map):
@@ -41,7 +42,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
 
 
 def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
-               bar_width, panel_height, panel_y, mouse, colors, game_state, shops, tilemap):
+               bar_width, panel_height, panel_y, mouse, colors, game_state, shops, tilemap, underfoot):
     if fov_recompute:
         libtcod.console_set_default_background(con, libtcod.black)
     # Draw all the tiles in the game map
@@ -54,7 +55,11 @@ def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, 
                     if wall:
                         libtcod.console_put_char_ex(con, x, y, tilemap.get('wall_tile'), libtcod.white, libtcod.black)
                     else:
-                        libtcod.console_put_char_ex(con, x, y, tilemap.get('floor_tile'), libtcod.white, libtcod.black)
+                        c = int(game_map.tiles[x][y].contaminants)
+                        if c > 255:
+                            c = 255
+                        ccol = (255, 255-c, 255-c)
+                        libtcod.console_put_char_ex(con, x, y, tilemap.get('floor_tile'), ccol, libtcod.black)
                         #since it's visible, explore it
                     game_map.tiles[x][y].explored = True
 
@@ -101,9 +106,18 @@ def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, 
     #draw player on top
     draw_entity(con, player, fov_map, game_map, tilemap)
 
+
     # show info about entity under
     f = entities + allies
     mouseinfo = get_names_under_mouse(mouse, f, fov_map)
+
+
+
+    #image = libtcod.image_from_console(con)
+
+    #libtcod.image_put_pixel(image, player.x, player.y + 16, libtcod.light_red)
+
+    #libtcod.image_blit_rect(image, 0, 0, 0, screen_width, screen_height, libtcod.BKGND_SET)
 
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
 
@@ -120,7 +134,13 @@ def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, 
         else:
             libtcod.console_blit(mpanel, 0, 0, 32, 1, 0, mouse.cx-x, mouse.cy, 1, 1)
     else:
-        libtcod.console_clear(mpanel)
+        if libtcod.map_is_in_fov(fov_map, mouse.cx, mouse.cy):
+            mpanel = libtcod.console_new(3, 3)
+            libtcod.console_set_default_background(mpanel, libtcod.light_cyan)
+            libtcod.console_rect(mpanel, 0, 0, 3, 3, False, libtcod.BKGND_SCREEN)
+            libtcod.console_blit(mpanel, 0, 0, 3, 3, 0, mouse.cx - 1, mouse.cy -1, 1, .5)
+        else:
+            libtcod.console_clear(mpanel)
 
     #libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
     #libtcod.console_blit(con, 0, 0, int(screen_width / 2), int(screen_height / 2), 0, 0-player.x+int(screen_width/2), 0-player.y+int(screen_height/2))
@@ -153,8 +173,8 @@ def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, 
 
     render_bar(panel, 1, 1, bar_width, 'HP', player.fighter.hp, player.fighter.max_hp,
                libtcod.light_red, libtcod.darker_red)
-    render_bar(panel, 1, 2, bar_width, 'Hunger', player.fighter.hunger, 100,
-               libtcod.light_blue, libtcod.darker_blue)
+    #render_bar(panel, 1, 2, bar_width, 'Hunger', player.fighter.hunger, 100,
+    #           libtcod.light_blue, libtcod.darker_blue)
     render_bar(panel, 1, 3, bar_width, 'Contact', player.fighter.contact, 100,
                libtcod.dark_yellow, libtcod.darker_yellow)
 
@@ -166,7 +186,11 @@ def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, 
                              'Dungeon level: {0}'.format(game_map.dungeon_level))
 
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
-    libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, mouseinfo)
+
+    #Show what is underfoot
+    #if game_map.tiles[player.x][player.y].name
+
+    libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, underfoot)
 
 
 

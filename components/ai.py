@@ -10,6 +10,9 @@ class BasicMonster:
         results = []
 
         monster = self.owner
+
+        game_map.tiles[monster.x][monster.y].contaminants += 10
+
         if monster.distance_to(target) < 4:
             if(target.fighter.contact < 100):
                 target.fighter.contact += 1
@@ -25,6 +28,14 @@ class BasicMonster:
             elif target.fighter.hp > 0:
                 attack_results = monster.fighter.attack(target)
                 results.extend(attack_results)
+
+        #if game_map.tiles[monster.x][monster.y].contaminants < 100:
+        #    game_map.tiles[monster.x][monster.y].contaminants += 10
+        #else:
+            for x in range(monster.x - 1, monster.x + 2):
+                for y in range(monster.y - 1, monster.y + 2):
+                    game_map.tiles[x][y].contaminants += 25
+            #game_map.tiles[monster.x][monster.y].contaminants = 100
 
         return results
 

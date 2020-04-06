@@ -1,6 +1,5 @@
 import libtcodpy as libtcod
 
-
 def menu(con, header, options, width, screen_width, screen_height):
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
 
@@ -41,6 +40,8 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
         options = []
 
         for item in player.inventory.items:
+            #print(int(item.render_order.value))
+            #if item.render_order.value is not 5:
             if player.equipment.main_hand == item:
                 options.append('{0} (on main hand)'.format(item.name))
             elif player.equipment.off_hand == item:

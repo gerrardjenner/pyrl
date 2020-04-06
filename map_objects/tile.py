@@ -2,7 +2,7 @@ class Tile:
     """
     A tile on a map. It may or may not be blocked, and may or may not block sight.
     """
-    def __init__(self, blocked, block_sight=None):
+    def __init__(self, blocked, block_sight=None, contaminants=0):
         self.blocked = blocked
 
         # By default, if a tile is blocked, it also blocks sight
@@ -12,3 +12,4 @@ class Tile:
         self.block_sight = block_sight
 
         self.explored = False
+        self.contaminants = 0

@@ -10,7 +10,7 @@ from entity import Entity
 
 from equipment_slots import EquipmentSlots
 from components.item import Item
-from item_functions import locate_ally
+from item_functions import locate_ally, throw_cleaner
 
 from game_messages import MessageLog
 
@@ -114,10 +114,20 @@ def get_game_variables(constants):
     allies = []
     shops = []
 
-    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
-    dagger = Entity(0, 0, '-', libtcod.sky, 'Dagger', equippable=equippable_component)
-    player.inventory.add_item(dagger)
-    player.equipment.toggle_equip(dagger)
+    #equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
+    #dagger = Entity(0, 0, '-', libtcod.sky, 'Dagger', equippable=equippable_component)
+    #player.inventory.add_item(dagger)
+    #player.equipment.toggle_equip(dagger)
+
+    #equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
+    #cleaner = Entity(0, 0, 'j', libtcod.red, 'Throw Cleaner', equippable=equippable_component, render_order=RenderOrder.ITEM, item=item_component)
+    #player.inventory.add_item(dagger)
+    #player.equipment.toggle_equip(dagger)
+
+
+    item_component = Item(use_function=throw_cleaner, damage=25, radius=3)
+    cleaner = Entity(0, 0, 'j', libtcod.red, 'Throw Cleaner', render_order=RenderOrder.HIDDEN, item=item_component)
+    player.inventory.add_item(cleaner)
 
     item_component = Item(use_function=locate_ally, alist=allies)
     item = Entity(0, 0, 'j', libtcod.red, 'Locate Ally', render_order=RenderOrder.ITEM, item=item_component, cost=40)
@@ -131,4 +141,4 @@ def get_game_variables(constants):
 
     game_state = GameStates.PLAYERS_TURN
 
-    return player, entities, game_map, message_log, game_state, allies, shops
+    return player, entities, game_map, message_log, game_state, allies, shops, cleaner

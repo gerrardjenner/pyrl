@@ -3,7 +3,7 @@ import os
 import shelve
 
 
-def save_game(player, entities, game_map, message_log, game_state, allies, shops):
+def save_game(player, entities, game_map, message_log, game_state, allies, shops, cleaner):
     with shelve.open('savegame.dat', 'n') as data_file:
         data_file['player_index'] = entities.index(player)
         data_file['entities'] = entities
@@ -12,6 +12,7 @@ def save_game(player, entities, game_map, message_log, game_state, allies, shops
         data_file['game_state'] = game_state
         data_file['allies'] = allies
         data_file['shops'] = shops
+        data_file['cleaner'] = cleaner
 
 
 def load_game():
@@ -26,7 +27,8 @@ def load_game():
         game_state = data_file['game_state']
         allies = data_file['allies']
         shops = data_file['shops']
+        cleaner = data_file['cleaner']
 
     player = entities[player_index]
 
-    return player, entities, game_map, message_log, game_state, allies, shops
+    return player, entities, game_map, message_log, game_state, allies, shops, cleaner

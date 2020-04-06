@@ -16,7 +16,7 @@ from random import randint
 from components.ai import Follower
 
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, mpanel, constants, allies, shops):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, mpanel, constants, allies, shops, cleaner):
     fov_recompute = True
 
     fov_map = initialize_fov(game_map)
@@ -28,6 +28,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
     previous_game_state = game_state
 
     targeting_item = None
+    underfoot = ' '
 
     #print(shops)
 
@@ -35,17 +36,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
         #
-        if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
-                          constants['fov_algorithm'])
 
-        render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, fov_recompute, message_log,
-                   constants['screen_width'], constants['screen_height'], constants['bar_width'],
-                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, shops, constants['tilemap'])
-
-        fov_recompute = False
-
-        libtcod.console_flush()
 
         clear_all(con, entities, allies)
 
@@ -97,6 +88,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
                     #if entity gold then add to gold
                     target = get_nonblocking_entities_at_location(entities, destination_x, destination_y)
                     if target:
+                        #print(target.name)
                         if target.name == 'Gold':
                             #print(target.name)
                             #player.inventory.add_item(target)
@@ -107,7 +99,10 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
                             message_log.add_message(Message('Hello! Press M to shop', libtcod.green))
                         elif target.stairs:
                             message_log.add_message(Message('Press Enter to take stairs', libtcod.green))
-
+                        #
+                        underfoot = target.name
+                    else:
+                        underfoot = ''
                     fov_recompute = True
 
                 game_state = GameStates.ENEMY_TURN
@@ -197,6 +192,16 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
                 player_turn_results.extend(item_use_results)
             elif right_click:
                 player_turn_results.append({'targeting_cancelled': True})
+        elif left_click:
+            target_x, target_y = left_click
+            #print('{0}, {1}'.format(target_x, target_y))
+
+            #player.inventory.add_item(item_component)
+            #player_turn_results.extend(player.inventory.use(item, entities=entities, fov_map=fov_map))
+            item_use_results = player.inventory.use(cleaner, entities=entities, fov_map=fov_map, game_map=game_map,
+                                                    target_x=target_x, target_y=target_y)
+            player_turn_results.extend(item_use_results)
+
 
         if exit:
             if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN, GameStates.SHOP_SCREEN):
@@ -204,7 +209,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
             else:
-                save_game(player, entities, game_map, message_log, game_state, allies, shops)
+                save_game(player, entities, game_map, message_log, game_state, allies, shops, cleaner)
 
                 return True
 
@@ -212,11 +217,13 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
         for player_turn_result in player_turn_results:
+            #print(player_turn_result.keys())
             message = player_turn_result.get('message')
             dead_entity = player_turn_result.get('dead')
             item_added = player_turn_result.get('item_added')
             gold_added = player_turn_result.get('gold_added')
             item_consumed = player_turn_result.get('consumed')
+            cleaner_used = player_turn_result.get('clean')
             item_dropped = player_turn_result.get('item_dropped')
             equip = player_turn_result.get('equip')
             targeting = player_turn_result.get('targeting')
@@ -251,6 +258,11 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
             if item_dropped:
                 entities.append(item_dropped)
 
+                game_state = GameStates.ENEMY_TURN
+
+            if cleaner_used:
+                print('cleaner used')
+                fov_recompute = True
                 game_state = GameStates.ENEMY_TURN
 
             if equip:
@@ -312,7 +324,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
                     ally_turn_results = asort[a].ai.take_turn(asort[a - 1], fov_map, game_map, entities, allies)
 
                 for ally_turn_result in ally_turn_results:
-                    print("Follower {0}".format(a))
+                    #print("Follower {0}".format(a))
                     message = ally_turn_result.get('message')
                     dead_entity = ally_turn_result.get('dead')
                     xp = ally_turn_result.get('xp')
@@ -340,17 +352,20 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
                             break
 
             # have a percent chance to increase hunger
-            if randint(0, 10) < 3:
-                player.fighter.hunger += 1
-                if player.fighter.contact > 1:
-                    player.fighter.contact += 1
+            #if randint(0, 10) < 3:
+            #    #player.fighter.hunger += 1
+            #    if player.fighter.contact > 1:
+            #        player.fighter.contact += 1
 
-            if player.fighter.hunger > 99:
-                player.fighter.hunger = 100
-                message_log.add_message(Message('Hunger Pain!', libtcod.lighter_red))
-                # take damage
-                floor_turn_results = player.fighter.take_damage(1)
-                # floor_turn_results.append(move_results)
+            player.fighter.contact += game_map.tiles[player.x][player.y].contaminants
+
+
+            #if player.fighter.hunger > 99:
+            #    player.fighter.hunger = 100
+            #    message_log.add_message(Message('Hunger Pain!', libtcod.lighter_red))
+            #    # take damage
+            #    floor_turn_results = player.fighter.take_damage(1)
+            #    # floor_turn_results.append(move_results)
 
             if player.fighter.contact > 99:
                 player.fighter.contact = 100
@@ -413,7 +428,19 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
             else:
                 game_state = GameStates.PLAYERS_TURN
 
+        if fov_recompute:
+            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
+                          constants['fov_algorithm'])
 
+        #
+        render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, fov_recompute, message_log,
+                   constants['screen_width'], constants['screen_height'], constants['bar_width'],
+                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, shops, constants['tilemap'], underfoot)
+
+        fov_recompute = False
+
+        libtcod.console_flush()
+        #
 
 
 def main():
@@ -472,13 +499,13 @@ def main():
             if show_load_error_message and (new_game or load_saved_game or exit_game):
                 show_load_error_message = False
             elif new_game:
-                player, entities, game_map, message_log, game_state, allies, shops = get_game_variables(constants)
+                player, entities, game_map, message_log, game_state, allies, shops, cleaner = get_game_variables(constants)
                 game_state = GameStates.PLAYERS_TURN
 
                 show_main_menu = False
             elif load_saved_game:
                 try:
-                    player, entities, game_map, message_log, game_state, allies, shops = load_game()
+                    player, entities, game_map, message_log, game_state, allies, shops, cleaner = load_game()
                     show_main_menu = False
                 except FileNotFoundError:
                     show_load_error_message = True
@@ -487,7 +514,7 @@ def main():
 
         else:
             libtcod.console_clear(con)
-            play_game(player, entities, game_map, message_log, game_state, con, panel, mpanel, constants, allies, shops)
+            play_game(player, entities, game_map, message_log, game_state, con, panel, mpanel, constants, allies, shops, cleaner)
 
             show_main_menu = True
 
