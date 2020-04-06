@@ -102,7 +102,7 @@ def throw_cleaner(*args, **kwargs):
     target_y = kwargs.get('target_y')
 
     results = []
-    print('throw_cleaner')
+    #print('throw_cleaner')
 
     if not libtcod.map_is_in_fov(fov_map, target_x, target_y):
         results.append({'consumed': False,

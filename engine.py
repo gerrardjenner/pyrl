@@ -261,7 +261,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
                 game_state = GameStates.ENEMY_TURN
 
             if cleaner_used:
-                print('cleaner used')
+                #print('cleaner used')
                 fov_recompute = True
                 game_state = GameStates.ENEMY_TURN
 

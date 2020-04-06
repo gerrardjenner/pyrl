@@ -74,7 +74,7 @@ def main_menu(con, background_image, screen_width, screen_height):
     libtcod.console_set_default_foreground(0, libtcod.light_yellow)
     libtcod.console_set_default_background(0, libtcod.black)
     libtcod.console_print_ex(0, int(screen_width / 2), int(screen_height / 2) - 4, libtcod.BKGND_SET, libtcod.CENTER,
-                             'INSANITARY')
+                             'INSANITARY: DONT TOUCH YOUR FACE')
     libtcod.console_print_ex(0, int(screen_width / 2), int(screen_height - 2), libtcod.BKGND_SET, libtcod.CENTER,
                              'By Gerrard Jenner')
 
@@ -90,6 +90,8 @@ def main_menu(con, background_image, screen_width, screen_height):
                              'Move Player: NumPad')
     libtcod.console_print_ex(0, int(screen_width / 2), (int(screen_height / 4) * 3)+2, libtcod.BKGND_NONE, libtcod.CENTER,
                              'Pickup Item: 5/G')
+    libtcod.console_print_ex(0, int(screen_width / 2), (int(screen_height / 4) * 3)+3, libtcod.BKGND_NONE, libtcod.CENTER,
+                             'Left Click: Clean')
     libtcod.console_print_ex(0, int(screen_width / 2), (int(screen_height / 4) * 3) + 4, libtcod.BKGND_NONE, libtcod.CENTER,
                              'Wait: 0/Z')
 
