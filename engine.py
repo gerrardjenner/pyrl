@@ -35,6 +35,17 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
         #
+        if fov_recompute:
+            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
+                          constants['fov_algorithm'])
+
+        render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, fov_recompute, message_log,
+                   constants['screen_width'], constants['screen_height'], constants['bar_width'],
+                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, shops, constants['tilemap'])
+
+        fov_recompute = False
+
+        libtcod.console_flush()
 
         clear_all(con, entities, allies)
 
@@ -402,17 +413,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
             else:
                 game_state = GameStates.PLAYERS_TURN
 
-        if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
-                          constants['fov_algorithm'])
 
-        render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, fov_recompute, message_log,
-                   constants['screen_width'], constants['screen_height'], constants['bar_width'],
-                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, shops)
-
-        fov_recompute = False
-
-        libtcod.console_flush()
 
 
 def main():
@@ -421,14 +422,18 @@ def main():
     #libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
     #libtcod.console_set_custom_font('terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
     #libtcod.console_set_custom_font('dejavu_wide16x16_gs_tc.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
-    libtcod.console_set_custom_font('terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
+    #libtcod.console_set_custom_font('terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
+    #libtcod.console_set_custom_font('TiledFont.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 10)
 
+    libtcod.console_set_custom_font('terminal16x16_gs_ro_ext.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, 16, 17)
+
+    load_customfont()
 
     libtcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['window_title'], False)
 
     con = libtcod.console_new(constants['screen_width'], constants['screen_height'])
     panel = libtcod.console_new(constants['screen_width'], constants['panel_height'])
-    mpanel = libtcod.console_new(constants['screen_width'], constants['screen_height'])
+    mpanel = libtcod.console_new(32, 1)
 
     player = None
     shops = []
@@ -485,6 +490,17 @@ def main():
             play_game(player, entities, game_map, message_log, game_state, con, panel, mpanel, constants, allies, shops)
 
             show_main_menu = True
+
+
+def load_customfont():
+    # The index of the first custom tile in the file
+    a = 256
+
+    # The "y" is the row index, here we load the sixth row in the font file. Increase the "6" to load any new rows from the file
+    for y in range(16, 17):
+        libtcod.console_map_ascii_codes_to_font(a, 16, 0, y)
+        a += 16
+
 
 
 if __name__ == '__main__':

@@ -49,6 +49,21 @@ def get_constants():
     max_monsters_per_room = 3
     max_items_per_room = 2
 
+    tilemap = {
+        'wall_tile': 256,
+        'floor_tile': 257,
+        'player_tile': 258,
+        'orc_tile': 259,
+        'troll_tile': 260,
+        'scroll_tile': 261,
+        'healingpotion_tile': 262,
+        'sword_tile': 263,
+        'shield_tile': 264,
+        'stairsdown_tile': 265,
+        'dagger_tile': 266,
+        'ally_tile': 267,
+    }
+
     colors = {
         'dark_wall': libtcod.Color(0, 0, 100),
         'dark_ground': libtcod.Color(50, 50, 150),
@@ -76,7 +91,8 @@ def get_constants():
         'fov_radius': fov_radius,
         'max_monsters_per_room': max_monsters_per_room,
         'max_items_per_room': max_items_per_room,
-        'colors': colors
+        'colors': colors,
+        'tilemap': tilemap
     }
 
     return constants
@@ -87,9 +103,13 @@ def get_game_variables(constants):
     inventory_component = Inventory(26)
     level_component = Level()
     equipment_component = Equipment()
-    player = Entity(0, 0, 2, libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
+    #player = Entity(0, 0, 2, libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
+    #                fighter=fighter_component, inventory=inventory_component, level=level_component,
+    #                equipment=equipment_component)
+    player = Entity(0, 0, 258, libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
                     fighter=fighter_component, inventory=inventory_component, level=level_component,
                     equipment=equipment_component)
+
     entities = [player]
     allies = []
     shops = []
@@ -105,7 +125,7 @@ def get_game_variables(constants):
 
     game_map = GameMap(constants['map_width'], constants['map_height'])
     game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'], player, entities, allies, shops)
+                      constants['map_width'], constants['map_height'], player, entities, allies, shops, constants['tilemap'])
 
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
 

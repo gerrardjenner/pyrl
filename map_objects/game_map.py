@@ -37,7 +37,7 @@ class GameMap:
 
         return tiles
 
-    def make_boss_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, allies, shops):
+    def make_boss_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, allies, shops, tilemap):
         rooms = []
         num_rooms = 0
         #2 rooms - small room to enter in connected to larger room
@@ -110,7 +110,7 @@ class GameMap:
 
 
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, allies, shops):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, allies, shops, tilemap):
         rooms = []
         num_rooms = 0
 
@@ -158,7 +158,7 @@ class GameMap:
                     shop_component = Shop(5)
 
                     item_component = Item(use_function=heal, amount=40)
-                    item = Entity(-1, -1, '!', libtcod.violet, 'Healing Potion', render_order=RenderOrder.ITEM, item=item_component, cost=20)
+                    item = Entity(-1, -1, tilemap.get('healingpotion_tile'), libtcod.violet, 'Healing Potion', render_order=RenderOrder.ITEM, item=item_component, cost=20)
                     shop_component.add_item(item)
 
                     item_component = Item(use_function=eat, amount=40)
@@ -197,7 +197,7 @@ class GameMap:
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
 
-                self.place_entities(new_room, entities)
+                self.place_entities(new_room, entities, tilemap)
 
                 # finally, append the new room to the list
                 rooms.append(new_room)
@@ -212,7 +212,7 @@ class GameMap:
         fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
         ai_component = Follower()
         # blocks true - pushable true?
-        follower = Entity(center_of_last_room_x + 1, center_of_last_room_y + 1, 1, libtcod.green,
+        follower = Entity(center_of_last_room_x + 1, center_of_last_room_y + 1, tilemap.get('ally_tile'), libtcod.white,
                           'Follower', blocks=True,
                           render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
         #print(follower.ai.found)
@@ -272,7 +272,7 @@ class GameMap:
                 i.y = new_y
             j += 1
 
-    def place_entities(self, room, entities):
+    def place_entities(self, room, entities, tilemap):
         max_monsters_per_room = from_dungeon_level([[2, 1], [3, 4], [5, 6]], self.dungeon_level)
         max_items_per_room = from_dungeon_level([[2, 1], [3, 4]], self.dungeon_level)
 
@@ -312,13 +312,13 @@ class GameMap:
                     fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
                     ai_component = BasicMonster()
 
-                    monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', blocks=True,
+                    monster = Entity(x, y, tilemap.get('orc_tile'), libtcod.white, 'Orc', blocks=True,
                                      render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 else:
                     fighter_component = Fighter(hp=30, defense=2, power=8, xp=100)
                     ai_component = BasicMonster()
 
-                    monster = Entity(x, y, 'T', libtcod.darker_green, 'Troll', blocks=True, fighter=fighter_component,
+                    monster = Entity(x, y, tilemap.get('troll_tile'), libtcod.darker_green, 'Troll', blocks=True, fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
 
                 entities.append(monster)
@@ -331,18 +331,18 @@ class GameMap:
                 item_choice = random_choice_from_dict(item_chances)
                 if item_choice == 'gold':
                     item_component = Item(use_function=acquire_gold, amount=randint(10, 40))
-                    item = Entity(x, y, '$', libtcod.gold, 'Gold', render_order=RenderOrder.ITEM, item=item_component)
+                    item = Entity(x, y, tilemap.get('healingpotion_tile'), libtcod.gold, 'Gold', render_order=RenderOrder.ITEM, item=item_component)
                 elif item_choice == 'healing_potion':
                     item_component = Item(use_function=heal, amount=40)
-                    item = Entity(x, y, '!', libtcod.violet, 'Healing Potion', render_order=RenderOrder.ITEM,
+                    item = Entity(x, y, tilemap.get('healingpotion_tile'), libtcod.violet, 'Healing Potion', render_order=RenderOrder.ITEM,
                                   item=item_component)
                 elif item_choice == 'apple':
                     item_component = Item(use_function=eat, amount=40)
-                    item = Entity(x, y, 'a', libtcod.red, 'Apple', render_order=RenderOrder.ITEM,
+                    item = Entity(x, y, tilemap.get('healingpotion_tile'), libtcod.red, 'Apple', render_order=RenderOrder.ITEM,
                                   item=item_component)
                 elif item_choice == 'sanitiser':
                     item_component = Item(use_function=clean, amount=100)
-                    item = Entity(x, y, 'b', libtcod.red, 'Hand Sanitiser', render_order=RenderOrder.ITEM,
+                    item = Entity(x, y, tilemap.get('healingpotion_tile'), libtcod.red, 'Hand Sanitiser', render_order=RenderOrder.ITEM,
                                   item=item_component)
                 elif item_choice == 'sword':
                     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=3)
@@ -386,7 +386,7 @@ class GameMap:
             self.make_boss_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
                                constants['map_width'], constants['map_height'], player, entities, allies, shops)
         else:
-            self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, allies, shops)
+            self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, allies, shops, constants['tilemap'])
 
 
 
