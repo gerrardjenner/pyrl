@@ -97,7 +97,11 @@ def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, 
     # Draw all entities in the list
     for entity in entities_in_render_order:
         if not isinstance(entity.ai, Follower):
-            draw_entity(con, entity, fov_map, game_map, tilemap)
+            if entity.char == '%' and not libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+                entities.remove(entity)
+                pass
+            else:
+                draw_entity(con, entity, fov_map, game_map, tilemap)
     #draw followers on top?
 
     for entity in allies:
@@ -227,8 +231,30 @@ def clear_all(con, entities, allies):
 
 
 def draw_entity(con, entity, fov_map, game_map, tilemap):
+    if game_map.tiles[entity.x][entity.y].explored:
+        if libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+            libtcod.console_set_default_background(con, (86, 114, 143))
+            libtcod.console_set_default_foreground(con, entity.color)
+            libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_ALPHA(1.0))
+        else:  # shaded discovered item not in fov
+            # libtcod.console_set_default_background(con, (86, 114, 143))
+            libtcod.console_set_default_background(con, (43, 57, 71))
+            libtcod.console_set_default_foreground(con, libtcod.grey)  # entity.color)
+            libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_ALPHA(1.0))
+    else:
+        if entity.item:
+            libtcod.console_set_default_foreground(con, libtcod.white)
+            libtcod.console_put_char(con, entity.x, entity.y, '+', libtcod.BKGND_NONE)
+        elif isinstance(entity.ai, Follower) and entity.ai.found:
+            # libtcod.console_set_default_background(con, (86, 114, 143))
+            libtcod.console_set_default_background(con, (43, 57, 71))
+            libtcod.console_set_default_foreground(con, libtcod.grey)  # entity.color)
+            libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_ALPHA(1.0))
+
+    '''
     #if (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or entity.item or libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
     if  (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or entity.item or isinstance(entity.ai, Follower) or libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+
         if entity.item and not game_map.tiles[entity.x][entity.y].explored:
             libtcod.console_set_default_foreground(con, libtcod.white)
             libtcod.console_put_char(con, entity.x, entity.y, '+', libtcod.BKGND_NONE)
@@ -236,10 +262,21 @@ def draw_entity(con, entity, fov_map, game_map, tilemap):
             libtcod.console_set_default_foreground(con, entity.color)
             libtcod.console_put_char(con, entity.x, entity.y, ' ', libtcod.BKGND_NONE)
         else:
-            libtcod.console_set_default_background(con, (86,114,143))
-            libtcod.console_set_default_foreground(con, entity.color)
-            libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_ALPHA(1.0))
-
+            if game_map.tiles[entity.x][entity.y].explored: #entity.stairs and
+                if libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+                    libtcod.console_set_default_background(con, (86, 114, 143))
+                    libtcod.console_set_default_foreground(con, entity.color)
+                    libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_ALPHA(1.0))
+                else:   #shaded discovered item not in fov
+                    #libtcod.console_set_default_background(con, (86, 114, 143))
+                    libtcod.console_set_default_background(con, (43, 57, 71))
+                    libtcod.console_set_default_foreground(con, libtcod.grey)#entity.color)
+                    libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_ALPHA(1.0))
+            else:
+                libtcod.console_set_default_background(con, (86,114,143))
+                libtcod.console_set_default_foreground(con, entity.color)
+                libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_ALPHA(1.0))
+    '''
 
 def clear_entity(con, entity):
     # erase the character that represents this object

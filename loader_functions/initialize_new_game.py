@@ -57,11 +57,13 @@ def get_constants():
         'troll_tile': 260,
         'scroll_tile': 261,
         'healingpotion_tile': 262,
-        'sword_tile': 263,
+        'cleaner_tile': 263,
         'shield_tile': 264,
         'stairsdown_tile': 265,
         'dagger_tile': 266,
         'ally_tile': 267,
+        'gold_tile': 268,
+        'shop_tile': 269
     }
 
     colors = {

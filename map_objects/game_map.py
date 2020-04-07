@@ -173,7 +173,7 @@ class GameMap:
                     item = Entity(-1, -1, 'j', libtcod.red, 'Locate Ally', render_order=RenderOrder.ITEM, item=item_component, cost=40)
                     shop_component.add_item(item)
 
-                    shop = Entity(new_room.x1+1, new_room.y1+1, 'M', libtcod.dark_red, 'Merchant', blocks=False,
+                    shop = Entity(new_room.x1+1, new_room.y1+1, tilemap['shop_tile'], libtcod.white, 'Merchant', blocks=False,
                                          render_order=RenderOrder.STAIRS, inventory = shop_component)
                     #print(shop)
                     entities.append(shop)
@@ -204,7 +204,7 @@ class GameMap:
                 num_rooms += 1
 
         stairs_component = Stairs(self.dungeon_level + 1)
-        down_stairs = Entity(center_of_last_room_x, center_of_last_room_y, '>', libtcod.white, 'Stairs',
+        down_stairs = Entity(center_of_last_room_x, center_of_last_room_y, tilemap['stairsdown_tile'], libtcod.white, 'Stairs',
                              render_order=RenderOrder.STAIRS, stairs=stairs_component)
         entities.append(down_stairs)
 
@@ -290,8 +290,8 @@ class GameMap:
         item_chances = {
             'healing_potion': 35,
             'gold': 40,
-            'apple': 40,
-            #'sanitiser': 50,
+            #'apple': 40,
+            'sanitiser': 50,
             'sword': from_dungeon_level([[5, 4]], self.dungeon_level),
             'shield': from_dungeon_level([[15, 8]], self.dungeon_level),
             'lightning_scroll': from_dungeon_level([[25, 4]], self.dungeon_level),
@@ -331,7 +331,7 @@ class GameMap:
                 item_choice = random_choice_from_dict(item_chances)
                 if item_choice == 'gold':
                     item_component = Item(use_function=acquire_gold, amount=randint(10, 40))
-                    item = Entity(x, y, tilemap.get('healingpotion_tile'), libtcod.gold, 'Gold', render_order=RenderOrder.ITEM, item=item_component)
+                    item = Entity(x, y, tilemap.get('gold_tile'), libtcod.white, 'Gold', render_order=RenderOrder.ITEM, item=item_component)
                 elif item_choice == 'healing_potion':
                     item_component = Item(use_function=heal, amount=40)
                     item = Entity(x, y, tilemap.get('healingpotion_tile'), libtcod.white, 'Healing Potion', render_order=RenderOrder.ITEM,
@@ -342,7 +342,7 @@ class GameMap:
                 #                  item=item_component)
                 elif item_choice == 'sanitiser':
                     item_component = Item(use_function=clean, amount=100)
-                    item = Entity(x, y, tilemap.get('healingpotion_tile'), libtcod.red, 'Hand Sanitiser', render_order=RenderOrder.ITEM,
+                    item = Entity(x, y, tilemap.get('cleaner_tile'), libtcod.white, 'Hand Sanitiser', render_order=RenderOrder.ITEM,
                                   item=item_component)
                 elif item_choice == 'sword':
                     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=3)
