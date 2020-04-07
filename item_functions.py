@@ -104,27 +104,28 @@ def throw_cleaner(*args, **kwargs):
     results = []
     #print('throw_cleaner')
 
-    if not libtcod.map_is_in_fov(fov_map, target_x, target_y):
-        results.append({'consumed': False,
-                        'message': Message('You cannot target a tile outside your field of view.', libtcod.yellow)})
-        return results
+    if target_x:
+        if not libtcod.map_is_in_fov(fov_map, target_x, target_y):
+            results.append({'consumed': False,
+                            'message': Message('You cannot target a tile outside your field of view.', libtcod.yellow)})
+            return results
 
-    for x in range(target_x-1, target_x+2):
-        for y in range(target_y - 1, target_y + 2):
-            game_map.tiles[x][y].contaminants = 0
+        for x in range(target_x-1, target_x+2):
+            for y in range(target_y - 1, target_y + 2):
+                game_map.tiles[x][y].contaminants = 0
 
-    #game_map.tiles[target_x][target_y].contaminants = 0
-    results.append({'clean': True,
-                    'message': Message('Everything within {0} tiles is clean!'.format(radius),
-                                       libtcod.orange)})
+        #game_map.tiles[target_x][target_y].contaminants = 0
+        results.append({'clean': True,
+                        'message': Message('Everything within {0} tiles is clean!'.format(radius),
+                                           libtcod.orange)})
 
-    for entity in entities:
-        if entity.distance(target_x, target_y) <= radius and entity.fighter:
-            results.append({'message': Message('The {0} gets {1}% cleaner.'.format(entity.name, damage),
-                                               libtcod.orange)})
-            entity.fighter.clean(damage)
-            #results.extend(entity.fighter.clean(damage))
-            #results.extend()
+        for entity in entities:
+            if entity.distance(target_x, target_y) <= radius and entity.fighter:
+                results.append({'message': Message('The {0} gets {1}% cleaner.'.format(entity.name, damage),
+                                                   libtcod.orange)})
+                entity.fighter.clean(damage)
+                #results.extend(entity.fighter.clean(damage))
+                #results.extend()
 
     #update the map state of every tile in radius
 

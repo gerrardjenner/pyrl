@@ -3,6 +3,7 @@ import libtcodpy as libtcod
 from components.equipment import Equipment
 from components.equippable import Equippable
 from components.fighter import Fighter
+from components.ai import Follower
 from components.inventory import Inventory
 from components.level import Level
 
@@ -113,7 +114,15 @@ def get_game_variables(constants):
                     equipment=equipment_component)
 
     entities = [player]
-    allies = []
+
+    # add Follower
+    fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
+    ai_component = Follower()
+    # blocks true - pushable true?
+    follower = Entity(1, 1, constants['tilemap'].get('ally_tile'), libtcod.white, 'Follower', blocks=True,
+                      render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+    allies = [follower]
+    #allies = []
     shops = []
 
     #equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
