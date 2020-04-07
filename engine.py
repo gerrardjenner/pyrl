@@ -95,7 +95,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
                             pickup_results = player.inventory.use(target)
                             player_turn_results.extend(pickup_results)
                             entities.remove(target)
-                        elif target.name == 'Merchant':
+                        elif target.name == 'Medi-vend':
                             message_log.add_message(Message('Hello! Press M to shop', libtcod.green))
                         elif target.stairs:
                             message_log.add_message(Message('Press Enter to take stairs', libtcod.green))
@@ -161,7 +161,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, m
 
         if show_merchant and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
-                if entity.name == 'Merchant' and entity.x == player.x and entity.y == player.y:
+                if entity.name == 'Medi-vend' and entity.x == player.x and entity.y == player.y:
                     message_log.add_message(Message('What would you like to buy?', libtcod.yellow))
                     previous_game_state = game_state
                     game_state = GameStates.SHOP_SCREEN

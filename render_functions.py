@@ -115,13 +115,12 @@ def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, 
     f = entities + allies
     mouseinfo = get_names_under_mouse(mouse, f, fov_map)
 
-
-
     #image = libtcod.image_from_console(con)
 
     #libtcod.image_put_pixel(image, player.x, player.y + 16, libtcod.light_red)
 
     #libtcod.image_blit_rect(image, 0, 0, 0, screen_width, screen_height, libtcod.BKGND_SET)
+    #libtcod.console_flush()
 
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
 
@@ -130,7 +129,8 @@ def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, 
         x = len(mouseinfo)
         mpanel = libtcod.console_new(x, 1)
         #libtcod.console_set_key_color(mpanel, libtcod.black)
-        libtcod.console_print_ex(mpanel, 0, 0, libtcod.BKGND_ALPHA(1.0), libtcod.LEFT, mouseinfo)
+        libtcod.console_set_default_background(mpanel, libtcod.black)
+        libtcod.console_print_ex(mpanel, 0, 0, libtcod.BKGND_ALPHA(0.5), libtcod.LEFT, mouseinfo)
         #print('{0}, {1}'.format(mouse.cx-len(mouseinfo), mouse.cy))
         #libtcod.console_set_key_color(mpanel, libtcod.black)
         if mouse.cx-x < 0:
@@ -162,6 +162,8 @@ def render_all(con, panel, mpanel, entities, allies, player, game_map, fov_map, 
     #else:
     #    #show mouse
     #    #libtcod.console_set_char_background(mpanel, mouse.cx, mouse.cy, libtcod.desaturated_red, libtcod.BKGND_SET)
+
+
 
 
 

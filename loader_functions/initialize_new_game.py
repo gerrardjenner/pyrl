@@ -56,7 +56,7 @@ def get_constants():
         'player_tile': 258,
         'orc_tile': 259,
         'troll_tile': 260,
-        'scroll_tile': 261,
+        'boss_tile': 261,
         'healingpotion_tile': 262,
         'cleaner_tile': 263,
         'shield_tile': 264,

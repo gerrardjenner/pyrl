@@ -197,8 +197,10 @@ def locate_ally(*args, **kwargs):
     results = []
 
     allies = kwargs.get('alist')
+    for a in allies:
+        a.ai.found = True
     #print(allies[-1].ai.found)
-    allies[-1].ai.found = True
+    #allies[-1].ai.found = True
 
     results.append({'consumed': True, 'message': Message('You reach out with your mind and sense an ally nearby!', libtcod.light_green)})
 

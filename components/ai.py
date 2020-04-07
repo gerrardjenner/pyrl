@@ -94,14 +94,58 @@ class Follower:
             for f in e:
                 if isinstance(f.ai, BasicMonster) and not f.char == '%':
                     if libtcod.map_is_in_fov(fov_map, f.x, f.y):
-                        if follower.distance_to(f) >= 2:
-                            follower.move_astar(f, e, game_map)
-                        elif target.fighter.hp > 0:
-                            #print('Attack')
-                            attack_results = follower.fighter.attack(f)
-                            results.extend(attack_results)
-                            #only do one attack
-                            break
+                        if follower.distance_to(f) < 2:
+                            if target.fighter.hp > 0:
+                                # print('Attack')
+                                attack_results = follower.fighter.attack(f)
+                                results.extend(attack_results)
+                                # only do one attack
+                                break
+                        else:
+                            follower.move_astar(f, entities, game_map)#ignore allies in a* but then check if on top of another
 
+                        #if follower.distance_to(f) >= 2:
+                        #    follower.move_astar(f, entities, game_map)#ignore allies in a* but then check if on top of another
+                        #elif target.fighter.hp > 0:
+                        #    #print('Attack')
+                        #    attack_results = follower.fighter.attack(f)
+                        #    results.extend(attack_results)
+                        #    #only do one attack
+                        #    break
+
+
+        return results
+
+class BossMonster:
+    def take_turn(self, target, fov_map, game_map, entities, allies):
+        results = []
+
+        monster = self.owner
+
+        game_map.tiles[monster.x][monster.y].contaminants += 10
+
+        if monster.distance_to(target) < 4:
+            if(target.fighter.contact < 100):
+                target.fighter.contact += 1
+                #attack_results = monster.fighter.attack(target)
+                #results.extend(attack_results)
+
+        if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
+
+            if monster.distance_to(target) >= 2:
+                e = allies + entities
+                monster.move_astar(target, e, game_map)
+
+            elif target.fighter.hp > 0:
+                attack_results = monster.fighter.attack(target)
+                results.extend(attack_results)
+
+        #if game_map.tiles[monster.x][monster.y].contaminants < 100:
+        #    game_map.tiles[monster.x][monster.y].contaminants += 10
+        #else:
+            for x in range(monster.x - 1, monster.x + 2):
+                for y in range(monster.y - 1, monster.y + 2):
+                    game_map.tiles[x][y].contaminants += 25
+            #game_map.tiles[monster.x][monster.y].contaminants = 100
 
         return results

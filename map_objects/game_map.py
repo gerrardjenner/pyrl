@@ -91,7 +91,7 @@ class GameMap:
                 fighter_component = Fighter(hp=60, defense=2, power=8, xp=300)
                 ai_component = BasicMonster()
 
-                monster = Entity(new_x, new_y, 'H', libtcod.darker_flame, 'Haggard Beast', blocks=True, fighter=fighter_component,
+                monster = Entity(new_x, new_y, tilemap['boss_tile'], libtcod.white, 'Haggard Infested', blocks=True, fighter=fighter_component,
                                  render_order=RenderOrder.ACTOR, ai=ai_component)
 
                 entities.append(monster)
@@ -173,7 +173,7 @@ class GameMap:
                     item = Entity(-1, -1, 'j', libtcod.red, 'Locate Ally', render_order=RenderOrder.ITEM, item=item_component, cost=40)
                     shop_component.add_item(item)
 
-                    shop = Entity(new_room.x1+1, new_room.y1+1, tilemap['shop_tile'], libtcod.white, 'Merchant', blocks=False,
+                    shop = Entity(new_room.x1+1, new_room.y1+1, tilemap['shop_tile'], libtcod.white, 'Medi-vend', blocks=False,
                                          render_order=RenderOrder.STAIRS, inventory = shop_component)
                     #print(shop)
                     entities.append(shop)
@@ -312,13 +312,13 @@ class GameMap:
                     fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
                     ai_component = BasicMonster()
 
-                    monster = Entity(x, y, tilemap.get('orc_tile'), libtcod.white, 'Orc', blocks=True,
+                    monster = Entity(x, y, tilemap.get('orc_tile'), libtcod.white, 'Infected', blocks=True,
                                      render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 else:
                     fighter_component = Fighter(hp=30, defense=2, power=8, xp=100)
                     ai_component = BasicMonster()
 
-                    monster = Entity(x, y, tilemap.get('troll_tile'), libtcod.darker_green, 'Troll', blocks=True, fighter=fighter_component,
+                    monster = Entity(x, y, tilemap.get('troll_tile'), libtcod.darker_green, 'Infested', blocks=True, fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
 
                 entities.append(monster)
@@ -382,9 +382,9 @@ class GameMap:
         shops.clear()
 
         self.tiles = self.initialize_tiles()
-        if self.dungeon_level % 5 == 0:
+        if self.dungeon_level % 2 == 0:
             self.make_boss_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                               constants['map_width'], constants['map_height'], player, entities, allies, shops)
+                               constants['map_width'], constants['map_height'], player, entities, allies, shops, constants['tilemap'])
         else:
             self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player, entities, allies, shops, constants['tilemap'])
 
